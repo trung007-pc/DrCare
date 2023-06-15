@@ -1,0 +1,11 @@
+﻿{
+  "Api:0001": "Item không tồn tại",
+  "Api:0002": "Item đã tồn tại",
+  "Api:0003": "Email đã tồn tại",
+
+
+
+  "User:0001": "Thông tin đăng nhập không chính xác vui lòng kiểm tra lại",
+  "User:0002": "UserName đã tồn tại"
+
+}

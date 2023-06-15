@@ -1,0 +1,160 @@
+﻿@page "/roles"
+@attribute [Authorize(AccessClaims.Roles.Default)]
+@inject RoleService _roleService;
+@inject Localizer L;
+@using Todo.BalzorServer.Services
+@using Todo.Contract.Roles
+@using Todo.Core.Enums
+@using Todo.Localziration
+@using Variant = Radzen.Variant
+@using ButtonType = Radzen.ButtonType
+@using AlignItems = Radzen.AlignItems
+@using Todo.BalzorServer.Helper
+@using Todo.Core.Consts.Permissions
+
+@inherits BaseBlazorPage
+
+
+
+<h3>@L["Role"]</h3>
+
+
+<div style="display: flex;justify-content: space-between;align-items: center">
+    <div>
+        <RadzenBreadCrumb >
+            <RadzenBreadCrumbItem Path="/" Icon="home" Style="font-size: 20px"/>
+            <RadzenBreadCrumbItem Text="@HeaderTitle" Style="font-weight: 300"/>
+        </RadzenBreadCrumb>
+    </div>
+    <div>
+       @if (CanCreate)
+       {
+             <RadzenButton Text="@L["Create"]" Click="@ShowNewModal" Icon="post_add" Style="margin-bottom: 20px;"/>
+       }
+    </div>
+</div>
+
+
+
+<RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="5" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+                Data="@Roles" TItem="RoleDto" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or">
+    <Columns>
+
+        <RadzenDataGridColumn TItem="RoleDto" Property="Name" Filterable="false" Title="Name" Frozen="true" Width="160px" TextAlign="TextAlign.Center"/>
+        <RadzenDataGridColumn TItem="RoleDto" Property="Code" Title="Code" Frozen="true" Width="160px"/>
+        <RadzenDataGridColumn TItem="RoleDto" Title="Action" Property="Id" Sortable="false" Width="160px">
+            <Template Context="data">
+                <RadzenSplitButton Click="(e) => { OnClick(e, data); }" AlwaysOpenPopup="true" Text="Actions" ButtonStyle="ButtonStyle.Primary">
+                    <ChildContent>
+                        @if (CanEdit)
+                        {
+                            <RadzenSplitButtonItem Text="Edit" Value="@FormActions.Edit"/>
+                        }
+                        @if (CanAuthorize)
+                        {
+                            <RadzenSplitButtonItem Text="Permission" Value="@FormActions.Claim"/>
+                        }
+                        @if (CanDelete)
+                        {
+                            <RadzenSplitButtonItem Text="Delete" Value="@FormActions.Delete"/>
+                        }
+                    </ChildContent>
+                </RadzenSplitButton>
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+
+<TDModel @ref="NewModal">
+    <RadzenAlert AlertStyle="AlertStyle.Info" ShowIcon="true" Variant="Variant.Flat" Shade="Shade.Lighter">
+        Editing Role
+    </RadzenAlert>
+    <EditForm Model="NewRole" OnValidSubmit="async () => { await CreateRole(); }">
+
+        <RadzenStack Orientation="Radzen.Orientation.Vertical" AlignItems="AlignItems.Normal" Wrap="FlexWrap.Wrap">
+
+            <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@L["Name"]</RadzenText>
+            <RadzenTextBox Class="w-100" @bind-Value="NewRole.Name"/>
+            <ValidationMessage For="@(() => NewRole.Name)"/>
+
+            <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@L["Code"]</RadzenText>
+            <RadzenTextBox Class="w-100" @bind-Value="NewRole.Code"/>
+            <ValidationMessage For="@(() => NewRole.Code)"/>
+            <RadzenStack Orientation="Radzen.Orientation.Horizontal" JustifyContent="JustifyContent.End">
+                <RadzenButton Text="@L["SaveChanges"]" BusyText="Saving ..." Icon="save" ButtonType="ButtonType.Submit" Size="ButtonSize.Large" IsBusy="IsDisable"/>
+                <RadzenButton ButtonStyle="ButtonStyle.Light" Icon="cancel" Click="@HideEditingModal" Size="ButtonSize.Large" Text="@L["Cancel"]" Disabled="IsDisable"/>
+            </RadzenStack>
+
+        </RadzenStack>
+
+
+    </EditForm>
+
+</TDModel>
+
+
+
+
+<TDModel @ref="EditingModal">
+    <RadzenAlert AlertStyle="AlertStyle.Info" ShowIcon="true" Variant="Variant.Flat" Shade="Shade.Lighter">
+        Editing Role
+    </RadzenAlert>
+    <EditForm Model="EditingRole" OnValidSubmit="async () => { await UpdateRole(); }">
+
+        <RadzenStack Orientation="Radzen.Orientation.Vertical" AlignItems="AlignItems.Normal" Wrap="FlexWrap.Wrap">
+
+            <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@L["Name"]</RadzenText>
+            <RadzenTextBox Class="w-100" @bind-Value="EditingRole.Name"/>
+            <ValidationMessage For="@(() => EditingRole.Name)"/>
+
+            <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@L["Code"]</RadzenText>
+            <RadzenTextBox Class="w-100" @bind-Value="EditingRole.Code"/>
+            <ValidationMessage For="@(() => EditingRole.Code)"/>
+            <RadzenStack Orientation="Radzen.Orientation.Horizontal" JustifyContent="JustifyContent.End">
+                <RadzenButton Text="@L["SaveChanges"]" BusyText="Saving ..." Icon="save" ButtonType="ButtonType.Submit" Size="ButtonSize.Large" IsBusy="IsDisable"/>
+                <RadzenButton ButtonStyle="ButtonStyle.Light" Icon="cancel" Click="@HideEditingModal" Size="ButtonSize.Large" Text="@L["Cancel"]" Disabled="IsDisable"/>
+            </RadzenStack>
+
+        </RadzenStack>
+
+
+    </EditForm>
+
+</TDModel>
+
+
+<TDModel @ref="ClaimModal" Width="60vw" >
+    <RadzenTabs TabPosition="TabPosition.Left" RenderMode="TabRenderMode.Client">
+        <Tabs>
+            <RadzenTabsItem Text="Identity management">
+                
+                @foreach (var items in Claims)
+                {
+                    <h2>@items.Key</h2>
+                    foreach (var item in items.Value)
+                    {
+                        <MudCheckBox @bind-Checked="@(item.IsSelected)"  Color="Color.Secondary">@item.Name</MudCheckBox>
+                    }
+                }
+                
+                
+              
+                
+                
+              
+                <RadzenStack Orientation="Radzen.Orientation.Horizontal" JustifyContent="JustifyContent.End">
+                    <RadzenButton Text="@L["SaveChanges"]" BusyText="Saving ..." Click="UpdateClaimsToRole" Icon="save" ButtonType="ButtonType.Submit" Size="ButtonSize.Large" IsBusy="IsDisable"/>
+                    <RadzenButton ButtonStyle="ButtonStyle.Light" Icon="cancel" Click="@HideEditingModal" Size="ButtonSize.Large" Text="@L["Cancel"]" IsBusy="IsDisable"/>
+                </RadzenStack>
+
+            </RadzenTabsItem>
+            <RadzenTabsItem Text="Tenant management">
+                <h1>2</h1>
+            </RadzenTabsItem>
+
+        </Tabs>
+
+    </RadzenTabs>
+
+</TDModel>

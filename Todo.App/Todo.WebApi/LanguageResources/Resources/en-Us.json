@@ -1,0 +1,8 @@
+﻿{
+  "Api:0001": "Item not found",
+  "Api:0002": "Item Already Exist",
+  "Api:0003": "Email Already Exist",
+
+  "User:0001": "Incorrect login information please check again",
+  "User:0002": "Item Already Exist"
+}

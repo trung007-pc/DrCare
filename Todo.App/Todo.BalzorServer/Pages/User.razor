@@ -1,0 +1,405 @@
+﻿@page "/users"
+@using ButtonType = Radzen.ButtonType
+@inject UserService _userService;
+@inherits BaseBlazorPage
+@inject RoleService _roleService;
+@inject IWebHostEnvironment _webHostEnvironment;
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Hosting
+@using Todo.BalzorServer.Services
+@using Todo.Contract.Roles
+@using Todo.Contract.Users
+@using Todo.Core.Enums
+@using Todo.Localziration
+@using Variant = Radzen.Variant
+@using AlignItems = MudBlazor.AlignItems
+@inject Localizer L;
+@inject IAuthorizationService AuthorizationService
+
+<h3>@L["User"]</h3>
+
+<div style="display: flex;justify-content: space-between;align-items: center">
+    <div>
+        <RadzenBreadCrumb >
+            <RadzenBreadCrumbItem Path="/" Icon="home" Style="font-size: 20px"/>
+            <RadzenBreadCrumbItem Text="@HeaderTitle" Style="font-weight: 300"/>
+        </RadzenBreadCrumb>
+    </div>
+
+    <div style="display: flex;gap: 5px">
+        @if (CanCreate)
+        {
+            <RadzenButton Text="@L["Create"]" Icon="person_add" Click="@ShowNewModal"/>
+        }
+    </div>
+
+</div>
+
+<RZBR/>
+<RZBR/>
+
+
+<RadzenCard>
+    <RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingBlazorise.Rows="false" PageSize="20" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+                    Data="@Users" TItem="UserWithNavigationPropertiesDto" ColumnWidth="300px"
+                    AllowSorting="true"
+                    FilterMode="FilterMode.Simple"
+                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                    LogicalFilterOperator="LogicalFilterOperator.Or"
+                    IsLoading="IsLoading"
+                    AllowColumnPicking="true"
+                    PageSizeOptions="PageSizeOptions"
+                    Style="width: 100%">
+        <Columns>
+            <RadzenDataGridColumn TItem="UserWithNavigationPropertiesDto" Title="Action" Property="User.UserName" Sortable="false" Width="160px">
+                <Template Context="data">
+                    <RadzenSplitButton Click="(e) => { OnClick(e, data); }" AlwaysOpenPopup="true" Text="Actions" ButtonStyle="ButtonStyle.Primary">
+                        <ChildContent>
+                            @if (CanEdit)
+                            {
+                                <RadzenSplitButtonItem Text="Edit" Value="@FormActions.Edit"/>
+                            }
+                            @if (CanAuthorize)
+                            {
+                                <RadzenSplitButtonItem Text="Permission" Value="@FormActions.Claim"/>
+                            }
+                            @if (CanDelete)
+                            {
+                                <RadzenSplitButtonItem Text="Delete" Value="@FormActions.Delete"/>
+                            }
+                        </ChildContent>
+                    </RadzenSplitButton>
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="UserWithNavigationPropertiesDto" Property="User.UserName" TextAlign="TextAlign.Center" Title="@L["User.UserName"]" Width="160px"/>
+            <RadzenDataGridColumn TItem="UserWithNavigationPropertiesDto" Property="User.EmployeeCode" TextAlign="TextAlign.Center" Title="@L["User.EmployeeCode"]" Width="160px"/>
+            <RadzenDataGridColumn TItem="UserWithNavigationPropertiesDto" Property="User.FirstName" TextAlign="TextAlign.Center" Title="@L["User.FirstName"]" Width="160px"/>
+            <RadzenDataGridColumn TItem="UserWithNavigationPropertiesDto" Property="User.LastName" TextAlign="TextAlign.Center" Title="@L["User.LastName"]" Width="160px"/>
+            <RadzenDataGridColumn TItem="UserWithNavigationPropertiesDto" Property="User.Gender" TextAlign="TextAlign.Center" Title="@L["User.Gender"]" Width="160px"/>
+            <RadzenDataGridColumn TItem="UserWithNavigationPropertiesDto" Property="User.DOB" FormatString="{0:d}" TextAlign="TextAlign.Center" Title="@L["User.DOB"]" Width="160px">
+                <Template Context="data">
+                    @($"{data.User.DOB:dd/MM/yyyy}")
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="UserWithNavigationPropertiesDto" Property="User.PhoneNumber" TextAlign="TextAlign.Center" Title="@L["User.PhoneNumber"]" Width="160px"/>
+            <RadzenDataGridColumn TItem="UserWithNavigationPropertiesDto" Property="User.Email" TextAlign="TextAlign.Center" Title="@L["User.Email"]" Width="160px"/>
+            <RadzenDataGridColumn TItem="UserWithNavigationPropertiesDto" Property="User.IsActive" FormatString="{0:d}" TextAlign="TextAlign.Center" Title="@L["User.IsActive"]" Width="160px">
+                <Template Context="data">
+                    <RadzenSwitch @bind-Value=@data.User.IsActive Disabled="true"/>
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="UserWithNavigationPropertiesDto" Property="Position.Name" TextAlign="TextAlign.Center" Title="@L["User.Position"]" Width="160px"/>
+
+
+            <RadzenDataGridColumn TItem="UserWithNavigationPropertiesDto" Resizable="true" Property="RoleNames" Sortable="false" Filterable="false" Title="@L["User.Roles"]">
+                <Template Context="data">
+                    @{ int i = 0; }
+                    @foreach (var item in data.Roles)
+                    {
+                        <RadzenBadge BadgeStyle="ChooseColorByNumber(i)" IsPill="@true" Text="@item.Name" Class="ml-2"/>
+                        i++;
+                    }
+
+                </Template>
+            </RadzenDataGridColumn>
+
+        </Columns>
+    </RadzenDataGrid>
+
+</RadzenCard>
+
+<TDModel @ref="NewModal" Width="70vw">
+
+    <EditForm Model="NewUser" OnValidSubmit="async () => { await CreateUser(); }">
+        <RadzenTabs RenderMode="TabRenderMode.Client">
+            <Tabs>
+                <RadzenTabsItem Text="@L["User"]">
+                    <DataAnnotationsValidator/>
+                    <RadzenStack Orientation="Radzen.Orientation.Vertical" JustifyContent="JustifyContent.End">
+
+                        <RadzenStack Orientation="Radzen.Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween">
+                            <div style="flex-basis: 50%">
+                                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@L["User.FirstName"]</RadzenText>
+                                <RadzenTextBox Class="w-100" @bind-Value="NewUser.FirstName"/>
+                                <ValidationMessage For="@(() => NewUser.FirstName)"/>
+                            </div>
+                            <div style="flex-basis: 50%">
+                                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@L["User.PasswordConfirmation"]</RadzenText>
+                                <RadzenPassword Class="w-100" @bind-Value="NewUser.PasswordConfirm"/>
+                                <ValidationMessage For="@(() => NewUser.PasswordConfirm)"/>
+
+                            </div>
+
+
+                        </RadzenStack>
+                        <RadzenStack Orientation="Radzen.Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween">
+                            <div style="flex-basis: 50%">
+                                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3"> @L["User.LastName"] </RadzenText>
+                                <RadzenTextBox Class="w-100" @bind-Value="NewUser.LastName"/>
+                                <ValidationMessage For="@(() => NewUser.LastName)"/>
+                            </div>
+                            <div style="flex-basis: 50%">
+                                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@L["User.Email"]</RadzenText>
+                                <RadzenTextBox Class="w-100" @bind-Value="NewUser.Email"/>
+                                <ValidationMessage For="@(() => NewUser.Email)"/>
+
+                            </div>
+
+
+                        </RadzenStack>
+                        <RadzenStack Orientation="Radzen.Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween">
+                            <div style="flex-basis: 50%">
+                                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@L["User.PhoneNumber"] </RadzenText>
+                                <RadzenTextBox Class="w-100" @bind-Value="NewUser.PhoneNumber"/>
+                                <ValidationMessage For="@(() => NewUser.PhoneNumber)"/>
+                            </div>
+                            <div style="flex-basis: 50%">
+                                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@L["User.DOB"]</RadzenText>
+                                <RadzenDatePicker @bind-Value=@NewUser.DOB DateFormat="dd/MM/yyyy" Class="w-100"/>
+                                <ValidationMessage For="@(() => NewUser.DOB)"/>
+
+                            </div>
+
+
+                        </RadzenStack>
+                        <RadzenStack Orientation="Radzen.Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" AlignItems="Radzen.AlignItems.Center">
+                            <div style="flex-basis: 50%">
+                                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@L["User.Password"]</RadzenText>
+                                <RadzenPassword Class="w-100" @bind-Value="NewUser.Password"/>
+                                <ValidationMessage For="@(() => NewUser.Password)"/>
+
+                            </div>
+                            <div style="flex-basis: 50%">
+                                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@L["User.Gender"]</RadzenText>
+                                <RadzenRadioButtonList @bind-Value="NewUser.Gender" Style="display:flex;margin-bottom: 10px">
+                                    <Items>
+                                        @foreach (var item in (Gender[]) Enum.GetValues(typeof(Gender)))
+                                        {
+                                            <RadzenRadioButtonListItem Text="@L[$"Enum:Gender:{(int) item}"]" Value="item"/>
+                                        }
+                                    </Items>
+                                </RadzenRadioButtonList>
+
+
+                            </div>
+
+
+                        </RadzenStack>
+                        <RadzenStack Orientation="Radzen.Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween">
+                            <div style="flex-basis: 50%">
+                                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" Style="display: inline">@L["User.IsActive"]</RadzenText>
+                                <RadzenSwitch @bind-Value=@NewUser.IsActive />
+                                <ValidationMessage For="@(() => NewUser.IsActive)"/>
+                            </div>
+                            <div style="flex-basis: 50%">
+
+
+                            </div>
+
+
+                        </RadzenStack>
+
+                    </RadzenStack>
+
+
+                </RadzenTabsItem>
+                <RadzenTabsItem Text="@L["User.Role"]">
+                    <RadzenTabsItem Text="@L["User.Role"]">
+
+
+                        <RadzenCheckBoxList Style="outline: none" TValue="Guid" @bind-Value="SelectedRoleIds" AllowSelectAll="true" Orientation="Radzen.Orientation.Vertical">
+                            <Items >
+                                @foreach (var item in Roles)
+                                {
+                                    <RadzenCheckBoxListItem Text="@item.Name" Value="@item.Id"/>
+                                }
+
+                            </Items>
+                        </RadzenCheckBoxList>
+
+
+                    </RadzenTabsItem>
+
+                </RadzenTabsItem>
+            </Tabs>
+
+        </RadzenTabs>
+
+        <RadzenStack Orientation="Radzen.Orientation.Horizontal" JustifyContent="JustifyContent.End">
+            <RadzenButton ButtonStyle="ButtonStyle.Light" Icon="cancel" Click="@HideNewModal" Text="@L["Cancel"]" IsBusy="IsDisable"/>
+            <RadzenButton Text="@L["SaveChanges"]" Icon="save" ButtonType="ButtonType.Submit" IsBusy="IsDisable"/>
+        </RadzenStack>
+
+
+    </EditForm>
+</TDModel>
+
+<TDModel @ref="EditingModal" Width="70vw">
+
+    <EditForm Model="EditingUser" OnValidSubmit="async () => { await CreateUser(); }">
+        <RadzenTabs RenderMode="TabRenderMode.Client">
+            <Tabs>
+                <RadzenTabsItem Text="@L["User"]">
+                    <DataAnnotationsValidator/>
+                    <RadzenStack Orientation="Radzen.Orientation.Vertical" JustifyContent="JustifyContent.End">
+
+                        <RadzenStack Orientation="Radzen.Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween">
+                            <div style="flex-basis: 50%">
+                                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@L["User.FirstName"]</RadzenText>
+                                <RadzenTextBox Class="w-100" @bind-Value="EditingUser.FirstName"/>
+                                <ValidationMessage For="@(() => EditingUser.FirstName)"/>
+                            </div>
+                            <div style="flex-basis: 50%">
+                                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@L["User.PasswordConfirmation"]</RadzenText>
+                                <RadzenPassword Class="w-100" @bind-Value="EditingUser.PasswordConfirm"/>
+                                <ValidationMessage For="@(() => EditingUser.PasswordConfirm)"/>
+
+                            </div>
+
+
+                        </RadzenStack>
+                        <RadzenStack Orientation="Radzen.Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween">
+                            <div style="flex-basis: 50%">
+                                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3"> @L["User.LastName"] </RadzenText>
+                                <RadzenTextBox Class="w-100" @bind-Value="EditingUser.LastName"/>
+                                <ValidationMessage For="@(() => EditingUser.LastName)"/>
+                            </div>
+                            <div style="flex-basis: 50%">
+                                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@L["User.Email"]</RadzenText>
+                                <RadzenTextBox Class="w-100" @bind-Value="EditingUser.Email"/>
+                                <ValidationMessage For="@(() => EditingUser.Email)"/>
+
+                            </div>
+
+
+                        </RadzenStack>
+                        <RadzenStack Orientation="Radzen.Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween">
+                            <div style="flex-basis: 50%">
+                                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@L["User.PhoneNumber"] </RadzenText>
+                                <RadzenTextBox Class="w-100" @bind-Value="EditingUser.PhoneNumber"/>
+                                <ValidationMessage For="@(() => EditingUser.PhoneNumber)"/>
+                            </div>
+                            <div style="flex-basis: 50%">
+                                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@L["User.DOB"]</RadzenText>
+                                <RadzenDatePicker @bind-Value=@EditingUser.DOB DateFormat="dd/MM/yyyy" Class="w-100"/>
+                                <ValidationMessage For="@(() => EditingUser.DOB)"/>
+
+                            </div>
+
+
+                        </RadzenStack>
+                        <RadzenStack Orientation="Radzen.Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" AlignItems="Radzen.AlignItems.Center">
+                            <div style="flex-basis: 50%">
+                                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@L["User.Password"]</RadzenText>
+                                <RadzenPassword Class="w-100" @bind-Value="EditingUser.Password"/>
+                                <ValidationMessage For="@(() => EditingUser.Password)"/>
+
+                            </div>
+                            <div style="flex-basis: 50%">
+                                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@L["User.Gender"]</RadzenText>
+                                <RadzenRadioButtonList @bind-Value="EditingUser.Gender" Style="display:flex;margin-bottom: 10px">
+                                    <Items>
+                                        @foreach (var item in (Gender[]) Enum.GetValues(typeof(Gender)))
+                                        {
+                                            <RadzenRadioButtonListItem Text="@L[$"Enum:Gender:{(int) item}"]" Value="item"/>
+                                        }
+                                    </Items>
+                                </RadzenRadioButtonList>
+
+
+                            </div>
+
+
+                        </RadzenStack>
+                        <RadzenStack Orientation="Radzen.Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween">
+                            <div style="flex-basis: 50%">
+                                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" Style="display: inline">@L["User.IsActive"]</RadzenText>
+                                <RadzenSwitch @bind-Value=@EditingUser.IsActive />
+                                <ValidationMessage For="@(() => EditingUser.IsActive)"/>
+                            </div>
+                            <div style="flex-basis: 50%">
+
+                                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" Style="display: inline">@L["User.ResetPassword"]</RadzenText>
+                                <RadzenSwitch @bind-Value=@EditingUser.IsSetPassword/>
+
+                                @if (EditingUser.IsSetPassword)
+                                {
+                                    <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" Style="margin-top: 25px">@L["User.Password"]</RadzenText>
+                                    <RadzenPassword Class="w-100" @bind-Value="EditingUser.Password"/>
+                                    <ValidationMessage For="@(() => EditingUser.Password)"/>
+                                    <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@L["User.PasswordConfirmation"]</RadzenText>
+                                    <RadzenPassword Class="w-100" @bind-Value="EditingUser.PasswordConfirm"/>
+                                    <ValidationMessage For="@(() => EditingUser.PasswordConfirm)"/>
+                                }
+                            </div>
+
+
+                        </RadzenStack>
+
+                    </RadzenStack>
+
+
+                </RadzenTabsItem>
+                <RadzenTabsItem Text="@L["User.Role"]">
+                    <RadzenTabsItem Text="@L["User.Role"]">
+
+
+                        <RadzenCheckBoxList Style="outline: none" TValue="Guid" @bind-Value="SelectedRoleIds" AllowSelectAll="true" Orientation="Radzen.Orientation.Vertical">
+                            <Items >
+                                @foreach (var item in Roles)
+                                {
+                                    <RadzenCheckBoxListItem Text="@item.Name" Value="@item.Id"/>
+                                }
+
+                            </Items>
+                        </RadzenCheckBoxList>
+
+
+                    </RadzenTabsItem>
+
+                </RadzenTabsItem>
+            </Tabs>
+
+        </RadzenTabs>
+
+        <RadzenStack Orientation="Radzen.Orientation.Horizontal" JustifyContent="JustifyContent.End">
+            <RadzenButton ButtonStyle="ButtonStyle.Light" Icon="cancel" Click="@HideNewModal" Text="@L["Cancel"]" IsBusy="IsDisable"/>
+            <RadzenButton Text="@L["SaveChanges"]" Icon="save" ButtonType="ButtonType.Submit" IsBusy="IsDisable"/>
+        </RadzenStack>
+
+
+    </EditForm>
+</TDModel>
+
+
+<TDModel @ref="ClaimModal" Width="70vw">
+    <RadzenTabs TabPosition="TabPosition.Left" RenderMode="TabRenderMode.Client">
+        <Tabs>
+            <RadzenTabsItem Text="Identity management">
+                @foreach (var items in Claims)
+                {
+                    <h2>@items.Key</h2>
+
+                    foreach (var item in items.Value)
+                    {
+                        <MudCheckBox @bind-Checked="@(item.IsSelected)" Disabled="item.IsDisabled" Color="Color.Secondary">@item.Name</MudCheckBox>
+                    }
+                }
+
+                <RadzenStack Orientation="Radzen.Orientation.Horizontal" JustifyContent="JustifyContent.End">
+                    <RadzenButton Text="@L["SaveChanges"]" BusyText="Saving ..." Click="UpdateClaimsToUser" Icon="save" ButtonType="ButtonType.Submit" Size="ButtonSize.Large" IsBusy="IsDisable"/>
+                    <RadzenButton ButtonStyle="ButtonStyle.Light" Icon="cancel" Click="@HideEditingModal" Size="ButtonSize.Large" Text="@L["Cancel"]" IsBusy="IsDisable"/>
+                </RadzenStack>
+
+            </RadzenTabsItem>
+            <RadzenTabsItem Text="Tenant management">
+                <h1>2</h1>
+            </RadzenTabsItem>
+
+        </Tabs>
+
+    </RadzenTabs>
+
+</TDModel>

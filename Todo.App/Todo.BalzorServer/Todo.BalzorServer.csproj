@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="AutoMapper" Version="12.0.1" />
+      <PackageReference Include="BlazorDateRangePicker" Version="4.3.0" />
+      <PackageReference Include="Blazored.LocalStorage" Version="4.3.0" />
+      <PackageReference Include="MudBlazor" Version="6.4.0" />
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+      <PackageReference Include="Radzen.Blazor" Version="4.13.0" />
+      <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.31.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Todo.Contract\Todo.Contract.csproj" />
+      <ProjectReference Include="..\Todo.Localziration\Todo.Localziration.csproj" />
+      <ProjectReference Include="..\Todo.Shared\Todo.Shared.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Resources\en-US.json" />
+      <_ContentIncludedByDefault Remove="Resources\vi-VI.json" />
+    </ItemGroup>
+
+</Project>

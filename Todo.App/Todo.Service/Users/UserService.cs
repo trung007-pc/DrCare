@@ -10,6 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 using Todo.Contract.Claims;
 using Todo.Contract.Users;
 using Todo.Core.Consts.ErrorCodes;
+using Todo.Core.Consts.Permissions;
 using Todo.Core.DependencyRegistrationTypes;
 using Todo.Core.Enums;
 using Todo.Domain.Roles;
@@ -295,6 +296,7 @@ public class UserService : BaseService,IUserService,ITransientDependency
                 .Select(x=>new Claim(x.ClaimType,x.ClaimValue));
             claims.AddRange(roleClaims);
             claims.AddRange(userClaims);
+            claims.Add(new Claim(ExtendClaimTypes.Tenant,user.TenantId == null ? "" : user.TenantId.ToString()));
             claims.Add(new Claim(ClaimTypes.PrimarySid, user.Id.ToString()));
             claims.Add(new Claim(ClaimTypes.Name, user.UserName));
             claims.Add(new Claim(ClaimTypes.Surname,user.FirstName +" "+ user.LastName));

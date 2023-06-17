@@ -15,12 +15,22 @@ public class UnitOfWork : ITransientDependency
     private UserClaimRepository _userClaimsRepository { get; set; }
     private TenantRepository _tenantRepository { get; set; }
 
+    private TenantClaimRepository _tenantClaimRepository { get; set; }
+
 
     public UnitOfWork(TodoContext context)
     {
         _context = context;
     }
 
+
+    public TenantClaimRepository TenantClaimRepository
+    {
+        get
+        {
+            return this._tenantClaimRepository ?? new TenantClaimRepository(_context);
+        }
+    }
     public UserRepository UserRepository
     {
         get

@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Todo.App.Middlewares;
 using Todo.Core.DependencyRegistrationTypes;
 using Todo.Core.Securitys;
 using Todo.Core.Validations;
@@ -142,7 +143,9 @@ public static class Installers
                 _service.AddTransient(type);
             }
         }
-        
+
+        _service.AddScoped<MultiTenantServiceMiddleware>();
+        _service.AddScoped<TenantContext>();
         _service.AddScoped<IAuthorizationHandler, AppAuthorizationHandler>();
 
     }

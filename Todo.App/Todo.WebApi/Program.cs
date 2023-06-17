@@ -30,6 +30,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseMiddleware<LocalizationMiddleware>();
 app.UseMiddleware<GlobalErrorHandlingMiddleware>();
+app.UseMiddleware<MultiTenantServiceMiddleware>();
 // app.UseStaticFiles(new StaticFileOptions
 // {
 //     FileProvider = new PhysicalFileProvider(

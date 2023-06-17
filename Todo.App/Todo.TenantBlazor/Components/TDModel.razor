@@ -1,0 +1,22 @@
+﻿@using DialogService = Radzen.DialogService
+@using DialogOptions = Radzen.DialogOptions
+@inject DialogService DialogService
+
+
+
+@code{
+    public async Task ShowModel()
+    {
+        var result = await DialogService.OpenAsync(Title, ds =>
+            @<div style="overflow: hidden">
+                @ChildContent
+            </div> , new DialogOptions() {Width = Width,Height = Height,Style = Style
+                       , ShowTitle = ShowTitle,CloseDialogOnOverlayClick = true});
+    }
+
+    public void HideModel()
+    {
+        DialogService.Close();
+    }
+
+}

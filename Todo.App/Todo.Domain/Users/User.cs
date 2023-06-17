@@ -2,10 +2,11 @@
 using MongoDB.Bson.Serialization.Serializers;
 using Todo.Core.Enums;
 using Todo.Domain.BaseEntities;
+using Todo.Domain.Tenants;
 
 namespace Todo.Domain.Users;
 
-public class User : IdentityUser<Guid>
+public class User : IdentityUser<Guid> ,ITenant
 {
     public string FirstName { get; set; }
     public string LastName { get; set; }
@@ -21,10 +22,15 @@ public class User : IdentityUser<Guid>
     public Guid LastModifierId { get; set; }
     public DateTime DeletionTime { get; set; } = DateTime.Now;
     public Guid CreatorId { get; set; }
-    public string AvatarURL { get; set; }
+    public string? AvatarURL { get; set; }
     public DateTime DOB { get; set; }
     
     public bool IsActive { get; set; }
     public bool IsDelete { get; set; }
+
+    public Guid? TenantId { get; set; }
     
+    
+    //nav - properties
+    public Tenant Tenant { get; set; }
 }

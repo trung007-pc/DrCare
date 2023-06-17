@@ -68,13 +68,67 @@ namespace Todo.App.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedName")
                         .IsUnique()
                         .HasDatabaseName("RoleNameIndex");
 
+                    b.HasIndex("TenantId");
+
                     b.ToTable("Roles", (string)null);
+                });
+
+            modelBuilder.Entity("Todo.Domain.TenantClaims.TenantClaim", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ClaimType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ClaimValue")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TenantClaims");
+                });
+
+            modelBuilder.Entity("Todo.Domain.Tenants.Tenant", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<DateTime>("EndDayDate")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Tenants");
                 });
 
             modelBuilder.Entity("Todo.Domain.UserClaims.UserClaim", b =>
@@ -147,7 +201,6 @@ namespace Todo.App.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("AvatarURL")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("ConcurrencyStamp")
@@ -219,6 +272,9 @@ namespace Todo.App.Migrations
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");
 
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uuid");
+
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("boolean");
 
@@ -234,6 +290,8 @@ namespace Todo.App.Migrations
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
+
+                    b.HasIndex("TenantId");
 
                     b.ToTable("Users", (string)null);
                 });
@@ -264,6 +322,16 @@ namespace Todo.App.Migrations
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Todo.Domain.Roles.Role", b =>
+                {
+                    b.HasOne("Todo.Domain.Tenants.Tenant", "Tenant")
+                        .WithMany("Roles")
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Tenant");
                 });
 
             modelBuilder.Entity("Todo.Domain.UserClaims.UserClaim", b =>
@@ -299,6 +367,16 @@ namespace Todo.App.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Todo.Domain.Users.User", b =>
+                {
+                    b.HasOne("Todo.Domain.Tenants.Tenant", "Tenant")
+                        .WithMany("Users")
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Tenant");
+                });
+
             modelBuilder.Entity("Todo.Domain.UserTokens.UserToken", b =>
                 {
                     b.HasOne("Todo.Domain.Users.User", null)
@@ -306,6 +384,13 @@ namespace Todo.App.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Todo.Domain.Tenants.Tenant", b =>
+                {
+                    b.Navigation("Roles");
+
+                    b.Navigation("Users");
                 });
 #pragma warning restore 612, 618
         }

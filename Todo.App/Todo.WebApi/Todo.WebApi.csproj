@@ -22,7 +22,6 @@
     <ItemGroup>
       <ProjectReference Include="..\Todo.Contract\Todo.Contract.csproj" />
       <ProjectReference Include="..\Todo.Shared\Todo.Shared.csproj" />
-      <ProjectReference Include="..\Todo.PostgreSQL\Todo.PostgreSQL.csproj" />
       <ProjectReference Include="..\Todo.Service\Todo.Service.csproj" />
     </ItemGroup>
 

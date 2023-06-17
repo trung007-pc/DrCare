@@ -24,9 +24,17 @@ public  class AccessClaims
         public const string Authorize = Default + ".Authorize";
 
     }
+    public static class  Tenants
+    {
+        public const string Default = GroupName + ".Tenants";
+        public const string Create = Default + ".Create";
+        public const string Edit = Default + ".Edit";
+        public const string Delete = Default + ".Delete";
+    }
 }
 
 public  class ExtendClaimTypes
 {
     public const string Permission = "permission";
+    public const string Tenant = "tenant";
 }

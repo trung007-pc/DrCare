@@ -57,14 +57,14 @@ public class TenantService : BaseService,ITenantService,ITransientDependency
             throw new GlobalException(_localizer[BaseErrorCode.NotFound], HttpStatusCode.BadRequest);
         }
         
-        if (tenantRepository.Entity.Any(x => x.Name == input.Name))
+        if (tenantRepository.Entity.Any(x => x.Name == input.Name  && x.Id!= id))
         {
             throw new GlobalException(_localizer[BaseErrorCode.ItemAlreadyExist], HttpStatusCode.BadRequest);
         }
 
         tenant = ObjectMapper.Map(input,tenant);
 
-        await tenantRepository.Entity.AddAsync(tenant);
+        tenantRepository.Entity.Update(tenant);
         _unitOfWork.SaveChange();
         
         return  ObjectMapper.Map<Tenant,TenantDto>(tenant);

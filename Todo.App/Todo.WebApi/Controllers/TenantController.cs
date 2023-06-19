@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Todo.Contract.Tenants;
 using Todo.Service.Tenants;
 
@@ -7,6 +8,7 @@ namespace Todo.App.Controllers;
 
 [ApiController]
 [Route("api/tenant/")]
+[Authorize]
 public class TenantController : ITenantService
 {
     private TenantService _tenantService;
@@ -16,7 +18,6 @@ public class TenantController : ITenantService
     }
     
     [HttpGet]
-    [Route("get-list")]
     public async Task<List<TenantDto>> GetListAsync()
     {
         return await _tenantService.GetListAsync();

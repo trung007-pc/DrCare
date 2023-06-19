@@ -9,6 +9,7 @@ namespace Todo.App.Controllers;
 
 [ApiController]
 [Route("api/role/")]
+[Authorize]
 public class RoleController : IRoleService
 {
     private RoleService _roleService;

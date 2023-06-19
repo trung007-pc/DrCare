@@ -4,21 +4,21 @@ using System.Text.Json;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor;
+using Todo.AdminBlazor.Helper;
 
 namespace Todo.AdminBlazor.Security;
 
 public class ApiAuthenticationStateProvider : AuthenticationStateProvider 
 {
-        private readonly ILocalStorageService _localStorage;
         private readonly ISnackbar _snackbar;
+        private CookieHelper _cookieHelper;
 
-
-    public ApiAuthenticationStateProvider(ILocalStorageService localStorage,
-        ISnackbar snackbar
+    public ApiAuthenticationStateProvider(
+        ISnackbar snackbar, CookieHelper cookieHelper
         )
     {
-        _localStorage = localStorage;
         _snackbar = snackbar;
+        _cookieHelper = cookieHelper;
     }
     
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
@@ -26,7 +26,7 @@ public class ApiAuthenticationStateProvider : AuthenticationStateProvider
         var savedToken = "";
         try
         {
-            savedToken = await _localStorage.GetItemAsync<string>("my-access-token"); 
+            savedToken =  _cookieHelper.GetCookie("access-token");
             
             if (string.IsNullOrWhiteSpace(savedToken))
             {
@@ -37,8 +37,7 @@ public class ApiAuthenticationStateProvider : AuthenticationStateProvider
 
             if (!CheckExpiredToken(claims))
             {
-                await _localStorage.RemoveItemAsync("my-access-token");
-                await _localStorage.RemoveItemAsync("my-refresh-token");
+                _cookieHelper.RemoveCookie("access-token");
 
 
                 NotificationMessage();
@@ -92,8 +91,7 @@ public class ApiAuthenticationStateProvider : AuthenticationStateProvider
     public async Task MarkUserAsLoggedOut()
     {
         var anonymousUser = new ClaimsPrincipal(new ClaimsIdentity());
-        await _localStorage.RemoveItemAsync("my-access-token");
-        await _localStorage.RemoveItemAsync("my-refresh-token");
+        _cookieHelper.RemoveCookie("access-token");
         var authState = Task.FromResult(new AuthenticationState(anonymousUser));
         
         NotifyAuthenticationStateChanged(authState);

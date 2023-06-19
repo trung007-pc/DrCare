@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Todo.AdminBlazor.Helper;
 using Todo.AdminBlazor.Network;
 using Todo.Core.Consts.Permissions;
 using Todo.Core.DependencyRegistrationTypes;
@@ -30,10 +31,12 @@ public static class Installers
 
      private static async void AddHttpClientConfig()
      {
-         _service.AddHttpClient("defaultClient", client =>
+         _service.AddHttpClient("DefaultClient", client =>
          {
              client.BaseAddress = new Uri("https://localhost:7195/api/");
-         }).AddHttpMessageHandler<JwtTokenHeaderHandler>();
+         });
+
+
 
      }
     
@@ -77,6 +80,7 @@ public static class Installers
         _service.AddScoped<IAuthorizationHandler, AppAuthorizationHandler>();
         _service.AddHttpContextAccessor();
         _service.AddScoped<JwtTokenHeaderHandler>();
+        _service.AddScoped<CookieHelper>();
 
     }
 }

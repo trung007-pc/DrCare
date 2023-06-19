@@ -9,14 +9,13 @@ namespace Todo.AdminBlazor.Services;
 
 public class RoleService :IRoleService,ITransientDependency
 {
-    protected HttpClient _client;
 
-    public RoleService(IHttpClientFactory factory) 
+    private HttpClient _client;
+    public RoleService(ClientSetter setter)
     {
-        _client = factory.HttpClientAsync("defaultClient");
-        
-
+        _client = setter.GetClient("DefaultClient");
     }
+    
 
     public async Task<List<RoleDto>> GetListAsync()
     {

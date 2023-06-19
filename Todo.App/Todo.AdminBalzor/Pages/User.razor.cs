@@ -235,7 +235,7 @@ public partial class User
              EditingModal.HideModel();
         }
    
-        public void ShowEditingModal(UserWithNavigationPropertiesDto userWithNavigationPropertiesDto)
+        public async void ShowEditingModal(UserWithNavigationPropertiesDto userWithNavigationPropertiesDto)
         {
             
             EditingUser = new UpdateUserDto();
@@ -245,7 +245,7 @@ public partial class User
             EditingUserId = userWithNavigationPropertiesDto.User.Id;
             EditingUser = ObjectMapper.Map<UserDto, UpdateUserDto>(userWithNavigationPropertiesDto.User);
             EditingUser.RoleIds = userWithNavigationPropertiesDto.Roles.Select(x=>x.Id).ToList();
-            EditingModal.ShowModel();
+            await EditingModal.ShowModel();
         }
 
 
@@ -277,6 +277,10 @@ public partial class User
             }
         }
 
+        public void OnSelectedRoleChange()
+        {
+            
+        }
       
     
 

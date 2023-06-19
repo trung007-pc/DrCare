@@ -6,11 +6,13 @@ using Todo.Core.DependencyRegistrationTypes;
 
 namespace Todo.AdminBlazor.Services;
 
-public class TenantService : BaseService,ITenantService,ITransientDependency
+public class TenantService :ITenantService,ITransientDependency
 {
     
-    public TenantService(ILocalStorageService localStorage,IHttpClientFactory factory,IHttpContextAccessor httpContextAccessor) : base(factory,localStorage,httpContextAccessor)
+    private HttpClient _client;
+    public TenantService(ClientSetter setter)
     {
+        _client = setter.GetClient("DefaultClient");
     }
     public async Task<List<TenantDto>> GetListAsync()
     {

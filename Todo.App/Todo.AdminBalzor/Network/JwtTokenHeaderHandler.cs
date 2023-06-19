@@ -5,10 +5,12 @@ namespace Todo.AdminBlazor.Network;
 public class JwtTokenHeaderHandler : DelegatingHandler
 {
     private readonly ILocalStorageService _localStorage;
+    private IHttpContextAccessor _httpContextAccessor;
 
-    public JwtTokenHeaderHandler(ILocalStorageService localStorage)
+    public JwtTokenHeaderHandler(ILocalStorageService localStorage,IHttpContextAccessor httpContextAccessor)
     {
         _localStorage = localStorage;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     protected override async Task<HttpResponseMessage> SendAsync(
@@ -19,7 +21,7 @@ public class JwtTokenHeaderHandler : DelegatingHandler
         {
             if (!request.Headers.Contains("bearer"))
             {
-                var savedToken = await _localStorage.GetItemAsync<string>("my-access-token");
+                var savedToken =  _httpContextAccessor.HttpContext.Request.Cookies["access-token"];
 
                 if (!string.IsNullOrWhiteSpace(savedToken))
                 {

@@ -1,5 +1,7 @@
 ﻿using Blazored.LocalStorage;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.JSInterop;
 using Todo.AdminBlazor.Network;
 using Todo.AdminBlazor.Security;
 using Todo.Contract.Claims;
@@ -8,14 +10,23 @@ using Todo.Core.DependencyRegistrationTypes;
 
 namespace Todo.AdminBlazor.Services;
 
-public class UserService :BaseService, IUserService,ITransientDependency
+public class UserService : IUserService,ITransientDependency
 {
     private readonly AuthenticationStateProvider  _authenticationStateProvider;
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private HttpClient _client;
+    
+    private IJSRuntime _JSRuntime { get; set; }
 
-    public UserService(ILocalStorageService localStorage,IHttpClientFactory factory,AuthenticationStateProvider  authenticationStateProvider,IHttpContextAccessor httpContextAccessor) : base(factory,localStorage,httpContextAccessor)
+    
+
+    public UserService(ILocalStorageService localStorage,IJSRuntime jsInterop,IHttpClientFactory factory
+        ,AuthenticationStateProvider  authenticationStateProvider,IHttpContextAccessor httpContextAccessor) 
     {
         _authenticationStateProvider = authenticationStateProvider;
-
+        _httpContextAccessor = httpContextAccessor;
+        _JSRuntime = jsInterop;
+        _client = factory.HttpClientAsync("DefaultClient");
     }
 
 
@@ -94,7 +105,9 @@ public class UserService :BaseService, IUserService,ITransientDependency
     public async Task<TokenDto> LoginAsync(LoginRequestDto request)
     {
         var response = await _client.PostAPIAsync<TokenDto>("user/login", request);
-        await _localStorage.SetItemAsync("my-access-token", response.Token);
+
+        await _JSRuntime.InvokeAsync<string>("blazorExtensions.WriteCookie", "access-token", response.Token, 2);
+        // await _localStorage.SetItemAsync("my-access-token", response.Token);
         ((ApiAuthenticationStateProvider) _authenticationStateProvider).MarkUserAsAuthenticated(request.UserName);
         return new TokenDto();
     }

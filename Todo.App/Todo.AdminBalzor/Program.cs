@@ -7,6 +7,7 @@ using MudBlazor;
 using MudBlazor.Services;
 using Radzen;
 using Todo.AdminBlazor.Data;
+using Todo.AdminBlazor.Network;
 using Todo.AdminBlazor.Security;
 using Todo.AdminBlazor.ServiceInstallers;
 using Todo.AdminBlazor.Services;
@@ -41,6 +42,8 @@ builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<TooltipService>();
 builder.Services.AddScoped<ContextMenuService>();
 builder.Services.AddScoped<AuthenticationStateProvider , ApiAuthenticationStateProvider>();
+builder.Services.AddScoped<ClientSetter>();
+builder.Services.AddScoped<TenantService>();
 builder.Services.InstallServices(builder.Configuration);
 
 

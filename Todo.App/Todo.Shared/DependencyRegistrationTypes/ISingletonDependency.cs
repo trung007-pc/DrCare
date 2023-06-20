@@ -1,6 +1,6 @@
 ﻿namespace Todo.Core.DependencyRegistrationTypes;
 
-public interface ISingletonDependency
+public interface ISingletonDependency : IDependencyService
 {
     
 }

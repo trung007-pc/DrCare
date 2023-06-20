@@ -18,6 +18,7 @@ builder.Services.InstallServices(builder.Configuration);
 
 
 var app = builder.Build();
+app.UseMiddleware<MultiTenantServiceMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -30,7 +31,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseMiddleware<LocalizationMiddleware>();
 app.UseMiddleware<GlobalErrorHandlingMiddleware>();
-app.UseMiddleware<MultiTenantServiceMiddleware>();
 // app.UseStaticFiles(new StaticFileOptions
 // {
 //     FileProvider = new PhysicalFileProvider(

@@ -15,7 +15,6 @@ public class ClientSetter
     public HttpClient GetClient(string name)
     {
        var _client = _factory.HttpClientAsync(name);
-
         var token = _cookieHelper.GetCookie("access-token");
         if (!string.IsNullOrEmpty(token))
         {

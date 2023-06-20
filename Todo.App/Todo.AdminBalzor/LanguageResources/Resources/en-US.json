@@ -75,7 +75,7 @@
   "User.Gender": "Gender",
   "User.DOB": "DOB",
   "User.PhoneNumber": "Phone Number",
-  "User.Email": "First Name",
+  "User.Email": "Email",
   "User.IsActive": "Is Active",
   "User.Password": "Password",
   "User.Position": "Position",

@@ -9,8 +9,10 @@ public class Tenant : Entity
     public string Name { get; set; }
     public DateTime StartDate { get; set; }
     public DateTime EndDayDate { get; set; }
+    public string PhoneNumber { get; set; }
+    public bool IsActive { get; set; }
+    public bool IsDeleted { get; set; }
     
-    
-    public List<User> Users { get; set; }
     public List<Role> Roles { get; set; }
+    
 }

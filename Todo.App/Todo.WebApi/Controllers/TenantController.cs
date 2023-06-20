@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Todo.Contract.Claims;
 using Todo.Contract.Tenants;
 using Todo.Service.Tenants;
 
@@ -41,5 +42,12 @@ public class TenantController : ITenantService
     public async Task DeleteAsync(Guid id)
     {
          await _tenantService.DeleteAsync(id);
+    }
+
+    [HttpPut]
+    [Route("update-claims/{id}")]
+    public async Task UpdateClaims(Guid id, List<CreateUpdateClaimDto> claims)
+    {
+        await _tenantService.UpdateClaims(id,claims);
     }
 }

@@ -5,6 +5,7 @@ using Todo.Domain.RoleClaims;
 using Todo.Domain.Roles;
 using Todo.Domain.TenantClaims;
 using Todo.Domain.Tenants;
+using Todo.Domain.Tests;
 using Todo.Domain.UserClaims;
 using Todo.Domain.UserLogins;
 using Todo.Domain.UserRoles;
@@ -21,12 +22,14 @@ public class TodoContext :  IdentityDbContext<User,Role,Guid,UserClaim,UserRole,
     public DbSet<RoleClaim> RoleClaims { get; set; }
     public DbSet<Tenant> Tenants { get; set; }
     public DbSet<TenantClaim> TenantClaims { get; set; }
+    public DbSet<Test> Tests { get; set; }
     private  Guid? TenantId { get; set; }
 
     public TodoContext(DbContextOptions<TodoContext> options,TenantContext tenantContext) : base(options)  
     {
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
         TenantId = tenantContext.TenantId;
+
     }  
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -46,6 +49,7 @@ public class TodoContext :  IdentityDbContext<User,Role,Guid,UserClaim,UserRole,
         }
         
         SetRelationShip(builder);
+        SetConstraint(builder);
         FilterGlobal(builder);
 
 
@@ -53,19 +57,18 @@ public class TodoContext :  IdentityDbContext<User,Role,Guid,UserClaim,UserRole,
 
     public void SetRelationShip(ModelBuilder builder)
     {
-        builder.Entity<User>()
-            .HasOne<Tenant>(x => x.Tenant)
-            .WithMany(x => x.Users)
-            .HasForeignKey(x => x.TenantId)
-            .IsRequired(false)
-            .OnDelete(DeleteBehavior.Restrict);
-        
         builder.Entity<Role>()
             .HasOne<Tenant>(x => x.Tenant)
             .WithMany(x => x.Roles)
             .HasForeignKey(x => x.TenantId)
             .IsRequired(false)
             .OnDelete(DeleteBehavior.Restrict);
+    }
+
+    public void SetConstraint(ModelBuilder builder)
+    {
+        builder.Entity<Tenant>().HasIndex(x => x.PhoneNumber).IsUnique(true);
+        builder.Entity<Role>().HasIndex(x => x.NormalizedName).HasDatabaseName("RoleNameIndex").IsUnique(false);
     }
 
     public void FilterGlobal(ModelBuilder builder)

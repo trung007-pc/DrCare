@@ -80,6 +80,7 @@ public static class Installers
             options.Lockout.AllowedForNewUsers = true;
 
             // Cấu hình về User.
+            
             options.User.AllowedUserNameCharacters = // các ký tự đặt tên user
                 "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
             options.User.RequireUniqueEmail = false;  // Email là duy nhất
@@ -136,13 +137,28 @@ public static class Installers
         {
             var assembly = Assembly.Load(assemblyName);
             var types = assembly.GetTypes()
-                .Where(t => typeof(ITransientDependency).IsAssignableFrom(t) && t.IsClass);
+                .Where(t => typeof(IDependencyService).IsAssignableFrom(t) && t.IsClass);
         
             foreach (var type in types)
             {
-                _service.AddTransient(type);
+                
+                if (typeof(ITransientDependency).IsAssignableFrom(type))
+                {
+                    _service.AddTransient(type);
+
+                }else if (typeof(IScopeDependency).IsAssignableFrom(type))
+                {
+                    _service.AddScoped(type);
+
+                }
+                else
+                {
+                    _service.AddSingleton(type);
+                }
             }
         }
+        
+        
 
         _service.AddScoped<MultiTenantServiceMiddleware>();
         _service.AddScoped<TenantContext>();

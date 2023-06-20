@@ -22,13 +22,13 @@ public class RoleService :BaseService,IRoleService,ITransientDependency
        private readonly UnitOfWork _unitOfWork;
        private RoleManager<Role> _roleManager;
 
-       private  Localizer _localizer { get; set; }
+       private  Localizer L { get; set; }
 
 
         public RoleService(UnitOfWork unitOfWork,RoleManager<Role> roleManager,Localizer localizer) 
         {
             _unitOfWork = unitOfWork;
-            _localizer = localizer;
+            L = localizer;
             _roleManager = roleManager;
         }
 
@@ -41,10 +41,9 @@ public class RoleService :BaseService,IRoleService,ITransientDependency
 
         public async Task<RoleDto> CreateAsync(CreateUpdateRoleDto input)
         {
-            
             HandleInput(input);
             var role = ObjectMapper.Map<CreateUpdateRoleDto, Role>(input);
-            
+         
             var result = await _roleManager.CreateAsync(role);
             if (!result.Succeeded)
             {
@@ -101,12 +100,12 @@ public class RoleService :BaseService,IRoleService,ITransientDependency
             var role = await  _unitOfWork.RoleRepository.Entity.FirstOrDefaultAsync(x=>x.Id == id);
             if (role == null)
             {
-                throw new GlobalException(_localizer[BaseErrorCode.NotFound], HttpStatusCode.BadRequest);
+                throw new GlobalException(L[BaseErrorCode.NotFound], HttpStatusCode.BadRequest);
             }
             
             if (CheckAllowedClaimType(claims))
             {
-                throw new GlobalException(_localizer[BaseErrorCode.InvalidRequirement], HttpStatusCode.BadRequest);
+                throw new GlobalException(L[BaseErrorCode.InvalidRequirement], HttpStatusCode.BadRequest);
             }
             
             var oldClaims = _unitOfWork.RoleClaimRepository
@@ -133,7 +132,7 @@ public class RoleService :BaseService,IRoleService,ITransientDependency
                 .Entity.FirstOrDefaultAsync(x => x.Id == roleId);
             if (role == null)
             {
-                throw new GlobalException(_localizer[BaseErrorCode.NotFound], HttpStatusCode.BadRequest);
+                throw new GlobalException(L[BaseErrorCode.NotFound], HttpStatusCode.BadRequest);
             }
             var result = (List<Claim>)  await _roleManager.GetClaimsAsync(role);
 
@@ -149,7 +148,7 @@ public class RoleService :BaseService,IRoleService,ITransientDependency
             
             if (CheckAllowedClaimType(input.Claims))
             {
-                throw new GlobalException(_localizer[BaseErrorCode.InvalidRequirement], HttpStatusCode.BadRequest);
+                throw new GlobalException(L[BaseErrorCode.InvalidRequirement], HttpStatusCode.BadRequest);
             }
             
             var roleClaims = new List<RoleClaim>();
@@ -193,7 +192,7 @@ public class RoleService :BaseService,IRoleService,ITransientDependency
         private void HandleInput(CreateUpdateRoleDto input)
         {
             input.Name = input.Name.Trim();
-            input.Code = input.Code.Trim();
+            input.Code = input.Code?.Trim();
         }
         
         private bool CheckAllowedClaimType(List<CreateUpdateClaimDto> Claims)

@@ -8,6 +8,7 @@
 @using Microsoft.AspNetCore.Hosting
 @using Todo.AdminBlazor.Services
 @using Todo.Contract.Users
+@using Todo.Contract.Validations
 @using Todo.Core.Enums
 @using Todo.Localziration
 @inject Localizer L;
@@ -203,21 +204,16 @@
 
                 </RadzenTabsItem>
                 <RadzenTabsItem Text="@L["User.Role"]">
-                    <RadzenTabsItem Text="@L["User.Role"]">
-                        @* <RadzenCheckBoxList Style="outline: none" TValue="Guid" @bind-Value="SelectedRoleIds" AllowSelectAll="true" Orientation="Radzen.Orientation.Vertical"> *@
-                        @*     <Items > *@
-                        @* *@
-                        @*        *@
-                        @* *@
-                        @*     </Items> *@
-                        @* </RadzenCheckBoxList> *@
-  @foreach (var item in Roles)
-                                {
-                                    <MudCheckBox T="Guid" Color="Color.Secondary" CheckedChanged="(e) => { }">@item.Name</MudCheckBox>
-
-                                }
-
-                    </RadzenTabsItem>
+                   <RadzenCheckBoxList Style="outline: none" TValue="Guid" @bind-Value="SelectedRoleIds" AllowSelectAll="true" Orientation="Radzen.Orientation.Vertical">
+                                        <Items >
+            
+                                            @foreach (var item in Roles)
+                                            {
+                                                <RadzenCheckBoxListItem Text="@item.Name" Value="@item.Id"/>
+                                            }
+            
+                                        </Items>
+                                    </RadzenCheckBoxList>
 
                 </RadzenTabsItem>
             </Tabs>
@@ -235,11 +231,11 @@
 
 <TDModel @ref="EditingModal" Width="70vw">
 
-    <EditForm Model="EditingUser" OnValidSubmit="async () => { await CreateUser(); }">
+    <EditForm Model="EditingUser" OnValidSubmit="async () => { await UpdateUser(); }">
         <RadzenTabs RenderMode="TabRenderMode.Client">
             <Tabs>
                 <RadzenTabsItem Text="@L["User"]">
-                    <DataAnnotationsValidator/>
+                   <FluentValidator TValidator="MUserValidator"/>
                     <RadzenStack Orientation="Radzen.Orientation.Vertical" JustifyContent="JustifyContent.End">
 
                         <RadzenStack Orientation="Radzen.Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween">
@@ -249,9 +245,9 @@
                                 <ValidationMessage For="@(() => EditingUser.FirstName)"/>
                             </div>
                             <div style="flex-basis: 50%">
-                                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@L["User.PasswordConfirmation"]</RadzenText>
-                                <RadzenPassword Class="w-100" @bind-Value="EditingUser.PasswordConfirm"/>
-                                <ValidationMessage For="@(() => EditingUser.PasswordConfirm)"/>
+                                     <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@L["User.Email"]</RadzenText>
+                                                             <RadzenTextBox Class="w-100" @bind-Value="EditingUser.Email"/>
+                                                             <ValidationMessage For="@(() => EditingUser.Email)"/>
 
                             </div>
 
@@ -264,9 +260,9 @@
                                 <ValidationMessage For="@(() => EditingUser.LastName)"/>
                             </div>
                             <div style="flex-basis: 50%">
-                                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@L["User.Email"]</RadzenText>
-                                <RadzenTextBox Class="w-100" @bind-Value="EditingUser.Email"/>
-                                <ValidationMessage For="@(() => EditingUser.Email)"/>
+                            <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@L["User.DOB"]</RadzenText>
+                                                        <RadzenDatePicker @bind-Value=@EditingUser.DOB DateFormat="dd/MM/yyyy" Class="w-100"/>
+                                                        <ValidationMessage For="@(() => EditingUser.DOB)"/>
 
                             </div>
 
@@ -279,23 +275,8 @@
                                 <ValidationMessage For="@(() => EditingUser.PhoneNumber)"/>
                             </div>
                             <div style="flex-basis: 50%">
-                                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@L["User.DOB"]</RadzenText>
-                                <RadzenDatePicker @bind-Value=@EditingUser.DOB DateFormat="dd/MM/yyyy" Class="w-100"/>
-                                <ValidationMessage For="@(() => EditingUser.DOB)"/>
-
-                            </div>
-
-
-                        </RadzenStack>
-                        <RadzenStack Orientation="Radzen.Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" AlignItems="Radzen.AlignItems.Center">
-                            <div style="flex-basis: 50%">
-                                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@L["User.Password"]</RadzenText>
-                                <RadzenPassword Class="w-100" @bind-Value="EditingUser.Password"/>
-                                <ValidationMessage For="@(() => EditingUser.Password)"/>
-
-                            </div>
-                            <div style="flex-basis: 50%">
-                                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@L["User.Gender"]</RadzenText>
+                            
+          <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@L["User.Gender"]</RadzenText>
                                 <RadzenRadioButtonList @bind-Value="EditingUser.Gender" Style="display:flex;margin-bottom: 10px">
                                     <Items>
                                         @foreach (var item in (Gender[]) Enum.GetValues(typeof(Gender)))
@@ -304,19 +285,19 @@
                                         }
                                     </Items>
                                 </RadzenRadioButtonList>
-
-
                             </div>
 
 
                         </RadzenStack>
-                        <RadzenStack Orientation="Radzen.Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween">
+                        <RadzenStack Orientation="Radzen.Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" AlignItems="Radzen.AlignItems.Center">
                             <div style="flex-basis: 50%">
-                                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" Style="display: inline">@L["User.IsActive"]</RadzenText>
-                                <RadzenSwitch @bind-Value=@EditingUser.IsActive />
-                                <ValidationMessage For="@(() => EditingUser.IsActive)"/>
+                                 <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" Style="display: inline">@L["User.IsActive"]</RadzenText>
+                                                        <RadzenSwitch @bind-Value=@EditingUser.IsActive />
+                                                        <ValidationMessage For="@(() => EditingUser.IsActive)"/>
+
                             </div>
                             <div style="flex-basis: 50%">
+                      
 
                                 <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" Style="display: inline">@L["User.ResetPassword"]</RadzenText>
                                 <RadzenSwitch @bind-Value=@EditingUser.IsSetPassword/>
@@ -330,31 +311,27 @@
                                     <RadzenPassword Class="w-100" @bind-Value="EditingUser.PasswordConfirm"/>
                                     <ValidationMessage For="@(() => EditingUser.PasswordConfirm)"/>
                                 }
+
                             </div>
 
 
                         </RadzenStack>
+                   
 
                     </RadzenStack>
 
 
                 </RadzenTabsItem>
                 <RadzenTabsItem Text="@L["User.Role"]">
-                    <RadzenTabsItem Text="@L["User.Role"]">
-
-
-                        <RadzenCheckBoxList Style="outline: none" TValue="Guid" @bind-Value="SelectedRoleIds" AllowSelectAll="true" Orientation="Radzen.Orientation.Vertical">
-                            <Items >
-                                @foreach (var item in Roles)
-                                {
-                                    <RadzenCheckBoxListItem Text="@item.Name" Value="@item.Id"/>
-                                }
-
-                            </Items>
-                        </RadzenCheckBoxList>
-
-
-                    </RadzenTabsItem>
+                          <RadzenCheckBoxList Style="outline: none" TValue="Guid" @bind-Value="SelectedRoleIds" AllowSelectAll="true" Orientation="Radzen.Orientation.Vertical">
+                                                <Items >
+                                                    @foreach (var item in Roles)
+                                                    {
+                                                        <RadzenCheckBoxListItem Text="@item.Name" Value="@item.Id"/>
+                                                    }
+                    
+                                                </Items>
+                                            </RadzenCheckBoxList>
 
                 </RadzenTabsItem>
             </Tabs>

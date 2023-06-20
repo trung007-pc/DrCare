@@ -151,17 +151,17 @@ public class BaseBlazorPage : ComponentBase
                     NotifyMessage("Không tìm thấy địa chỉ cuộc gọi",Color.Secondary,Severity.Error);
                 }
                 
-                if (exceptionType == typeof(BadRequestException))
+                else if (exceptionType == typeof(BadRequestException))
                 {
                     NotifyMessage(e.Message,Color.Secondary,Severity.Error);
                 }
 
-                if (exceptionType == typeof(UnauthorizedOperationException))
+                else if (exceptionType == typeof(UnauthorizedOperationException))
                 {
                     NotifyMessage(e.Message,Color.Secondary,Severity.Error);
                 }
                 
-                if (exceptionType == typeof(UnauthorizedException))
+                else if (exceptionType == typeof(UnauthorizedException))
                 {
                     NotifyMessage(e.Message,Color.Secondary,Severity.Error);
 
@@ -170,50 +170,44 @@ public class BaseBlazorPage : ComponentBase
                     _navigationManager.NavigateTo($"login?ToURl={_navigationManager.Uri}", true);
                 }
 
-                if (exceptionType == typeof(ServerErrorException))
+                else if (exceptionType == typeof(ServerErrorException))
                 {
                     _navigationManager.NavigateTo("server-error", true);
                 }
 
-                if (exceptionType == typeof(DbConnectionException))
+                else if (exceptionType == typeof(DbConnectionException))
                 {
                     _navigationManager.NavigateTo("connection-error", true);
                 }
 
-                if (exceptionType == typeof(ConflictException))
+                else if (exceptionType == typeof(ConflictException))
                 {
                     NotifyMessage(e.Message,Color.Secondary,Severity.Error);
 
                 }
 
-                if (exceptionType == typeof(TooManyRequests))
+                else if (exceptionType == typeof(TooManyRequests))
                 {
                     // too many request
                 }
                 
-                if (exceptionType == typeof(FailedOperation))
+                else if (exceptionType == typeof(FailedOperation))
                 {
                     NotifyMessage(e.Message,Color.Secondary,Severity.Error);
 
 
                 }
 
-                if (exceptionType == typeof(HttpRequestException))
+                else if (exceptionType == typeof(HttpRequestException))
                 {
                     NotifyMessage(e.Message,Color.Secondary,Severity.Error);
 
                 }
-
-                if (exceptionType == typeof(TaskCanceledException))
+                else
                 {
-                    // _notificationService.Notify(new NotificationMessage
-                    // {
-                    //     Severity = NotificationSeverity.Warning, Summary = "Can't connect to server APi ", Detail = "Thời gian yêu cầu quá lâu.vui lòng reload thử lại",Duration = 5000,
-                    // });
- 
+                    NotifyMessage("Có lỗi ở phía client vui lòng báo lại cho IT",Color.Secondary,Severity.Error);
                 }
 
-                // _navigationManager.NavigateTo("server-error",true);
 
             }finally
             {

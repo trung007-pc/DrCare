@@ -1,6 +1,6 @@
 ﻿namespace Todo.Core.DependencyRegistrationTypes;
 
-public interface IScopeDependency
+public interface IScopeDependency : IDependencyService
 {
     
 }

@@ -2,8 +2,10 @@
 using AutoMapper;
 using Todo.Contract.Claims;
 using Todo.Contract.Roles;
+using Todo.Contract.Tenants;
 using Todo.Contract.Users;
 using Todo.Domain.Roles;
+using Todo.Domain.Tenants;
 using Todo.Domain.Users;
 
 namespace Todo.Service;
@@ -21,5 +23,8 @@ public class AutoMapperProfile : Profile
         CreateMap<Claim, ClaimDto>();
         CreateMap<CreateUpdateRoleDto, Role>();
         CreateMap<Role, RoleDto>();
+
+        CreateMap<CreateUpdateTenantDto, Tenant>();
+        CreateMap<Tenant,TenantDto>();
     }
 }

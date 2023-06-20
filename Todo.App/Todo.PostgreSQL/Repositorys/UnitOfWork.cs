@@ -5,7 +5,7 @@ using Todo.MongoDb.PostgreSQL;
 
 namespace Todo.MongoDb.Repositorys;
 
-public class UnitOfWork : ITransientDependency
+public class UnitOfWork : IScopeDependency
 {
     private TodoContext _context { get; set; }
     private UserRepository _userRepository { get; set; }
@@ -14,6 +14,7 @@ public class UnitOfWork : ITransientDependency
     private RoleClaimRepository _roleClaimsRepository { get; set; }
     private UserClaimRepository _userClaimsRepository { get; set; }
     private TenantRepository _tenantRepository { get; set; }
+    private TestRepository _testRepository { get; set; }
 
     private TenantClaimRepository _tenantClaimRepository { get; set; }
 
@@ -23,6 +24,13 @@ public class UnitOfWork : ITransientDependency
         _context = context;
     }
 
+    public TestRepository TestRepository
+    {
+        get
+        {
+            return this._testRepository ?? new TestRepository(_context);
+        }
+    }
 
     public TenantClaimRepository TenantClaimRepository
     {

@@ -1,5 +1,6 @@
 ﻿using Blazored.LocalStorage;
 using Todo.AdminBlazor.Network;
+using Todo.Contract.Claims;
 using Todo.Contract.Tenants;
 using Todo.Contract.Tenants;
 using Todo.Core.DependencyRegistrationTypes;
@@ -34,5 +35,10 @@ public class TenantService :ITenantService,ITransientDependency
     public async Task DeleteAsync(Guid id)
     { 
         await _client.DeleteAPIAsync<Task>($"tenant/{id}");
+    }
+
+    public async Task UpdateClaims(Guid id, List<CreateUpdateClaimDto> claims)
+    {
+         await _client.PutAPIAsync<Task>($"tenant/update-claims/{id}" , claims);
     }
 }

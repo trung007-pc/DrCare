@@ -59,6 +59,7 @@ public partial class Tenant
             CanCreate = claims.Any(x => x == AccessClaims.Tenants.Create);
             CanEdit = claims.Any(x => x == AccessClaims.Tenants.Edit);
             CanCreate = claims.Any(x => x == AccessClaims.Tenants.Create);
+            CanAuthorize = claims.Any(x => x == AccessClaims.Tenants.Authorize);
         }
         public async Task GetTenants()
         {
@@ -182,24 +183,24 @@ public partial class Tenant
             await ClaimModal.ShowModel();
         }
 
-        // public async Task UpdateClaimsToTenant()
-        // {
-        //     var claims = new List<CreateUpdateClaimDto>();
-        //     var selectedClaims = Claims.SelectMany(x => x.Value)
-        //         .Where(x => x.IsSelected).ToList();
-        //     foreach (var item in selectedClaims)
-        //     {
-        //         claims.Add(new CreateUpdateClaimDto()
-        //         {
-        //             ClaimType = ExtendClaimTypes.Permission,
-        //             ClaimValue = item.Value
-        //         });
-        //     }
-        //     await InvokeAsync(async () =>
-        //     {
-        //         await _tenantService.UpdateAsync(claims,EditingTenantId);
-        //         HideClaim();
-        //     },ActionTypes.Update,true);
-        //
-        // }
+        public async Task UpdateClaimsToTenant()
+        {
+            var claims = new List<CreateUpdateClaimDto>();
+            var selectedClaims = Claims.SelectMany(x => x.Value)
+                .Where(x => x.IsSelected).ToList();
+            foreach (var item in selectedClaims)
+            {
+                claims.Add(new CreateUpdateClaimDto()
+                {
+                    ClaimType = ExtendClaimTypes.Permission,
+                    ClaimValue = item.Value
+                });
+            }
+            await InvokeAsync(async () =>
+            {
+                await _tenantService.UpdateClaims(EditingTenantId,claims);
+                HideClaim();
+            },ActionTypes.Update,true);
+        
+        }
 }

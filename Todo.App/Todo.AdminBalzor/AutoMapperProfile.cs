@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Todo.Contract.Roles;
+using Todo.Contract.TenantClaims;
+using Todo.Contract.Tenants;
 using Todo.Contract.Users;
 
 namespace Todo.AdminBlazor;
@@ -14,6 +16,8 @@ public class AutoMapperProfile : Profile
         CreateMap<UserDto, UpdateUserDto>().ReverseMap();
 
         CreateMap<UserWithNavigationPropertiesDto, UpdateUserDto>().ReverseMap();
+
+        CreateMap<TenantDto, CreateUpdateTenantDto>();
     }
 
 }

@@ -78,6 +78,7 @@ public class TodoContext :  IdentityDbContext<User,Role,Guid,UserClaim,UserRole,
 
     public void SetConstraint(ModelBuilder builder)
     {
+        
         builder.Entity<Tenant>().HasIndex(x => x.PhoneNumber).IsUnique(true);
         builder.Entity<Role>().HasIndex(x => x.NormalizedName).HasDatabaseName("RoleNameIndex").IsUnique(false);
     }
@@ -122,7 +123,8 @@ public class TodoContext :  IdentityDbContext<User,Role,Guid,UserClaim,UserRole,
                 UserName = "admin",
                 NormalizedUserName = "ADMIN",
                 IsActive = true,
-                PasswordHash = hasher.HashPassword(null, "a123456")
+                PasswordHash = hasher.HashPassword(null, "a123456"),
+                SecurityStamp = Guid.NewGuid().ToString()
             }
         );
         
@@ -172,16 +174,20 @@ public class TodoContext :  IdentityDbContext<User,Role,Guid,UserClaim,UserRole,
     }
     public override int SaveChanges()
     {
-        foreach (var entry in ChangeTracker.Entries<ITenant>().ToList())
+        if (TenantId.HasValue)
         {
-            switch (entry.State)
+            foreach (var entry in ChangeTracker.Entries<ITenant>().ToList())
             {
-                case EntityState.Added:
-                case EntityState.Modified:
-                    entry.Entity.TenantId = TenantId;
-                    break;
+                switch (entry.State)
+                {
+                    case EntityState.Added:
+                    case EntityState.Modified:
+                        entry.Entity.TenantId = TenantId;
+                        break;
+                }
             }
         }
+        
         var result = base.SaveChanges();
         return result;
     }
@@ -190,14 +196,17 @@ public class TodoContext :  IdentityDbContext<User,Role,Guid,UserClaim,UserRole,
 
     public override async  Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
     {
-        foreach (var entry in ChangeTracker.Entries<ITenant>().ToList())
+        if (TenantId.HasValue)
         {
-            switch (entry.State)
+            foreach (var entry in ChangeTracker.Entries<ITenant>().ToList())
             {
-                case EntityState.Added:
-                case EntityState.Modified:
-                    entry.Entity.TenantId = TenantId;
-                    break;
+                switch (entry.State)
+                {
+                    case EntityState.Added:
+                    case EntityState.Modified:
+                        entry.Entity.TenantId = TenantId;
+                        break;
+                }
             }
         }
         var result = await base.SaveChangesAsync(cancellationToken);

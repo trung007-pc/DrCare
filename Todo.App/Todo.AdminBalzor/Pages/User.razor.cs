@@ -168,9 +168,9 @@ public partial class User
         }
         
         
-        public async Task HideClaim()
-        {
-            await ClaimModal.ShowModel();
+        public void HideClaim()
+        { 
+             ClaimModal.HideModel();
         }
 
         public async Task UpdateClaimsToUser()
@@ -192,6 +192,7 @@ public partial class User
             await InvokeAsync(async () =>
             {
                await _userService.UpdateUserClaims(EditingUserId, claims);
+               HideClaim();
             },ActionTypes.Update,true);
         }
 

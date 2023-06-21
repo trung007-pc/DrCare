@@ -104,14 +104,36 @@ public class TenantService : BaseService,ITenantService,ITransientDependency
         {
             throw new GlobalException(_localizer[BaseErrorCode.NotFound], HttpStatusCode.BadRequest);
         }
-            
+
+        var tenantUserIds = await _unitOfWork
+            .UserRepository
+            .Entity
+            .Where(x=>x.TenantIds.Contains(id))
+            .Select(x=>x.Id)
+            .ToListAsync();
+
+        var tenantRoleIds = await _unitOfWork
+            .RoleRepository
+            .Entity
+            .Where(x=>x.TenantId == id)
+            .Select(x => x.Id)
+            .ToListAsync();
+
+        var tenantUserClaims = await _unitOfWork.UserClaimRepository
+            .GetListAsync(x => tenantUserIds.Contains(x.UserId));
+        var tenantRoleCLaims =  await _unitOfWork.RoleClaimRepository
+            .GetListAsync(x => tenantRoleIds.Contains(x.RoleId));
+        
         if (CheckAllowedClaimType(claims))
         {
             throw new GlobalException(_localizer[BaseErrorCode.InvalidRequirement], HttpStatusCode.BadRequest);
         }
-            
-        var oldClaims = _unitOfWork.TenantClaimRepository
-            .Entity.Where(x => x.TenantId == id);
+
+        var oldClaims = await _unitOfWork.TenantClaimRepository
+            .GetListAsync(x => x.TenantId == id);
+        
+        
+        
         _unitOfWork.TenantClaimRepository.Entity.RemoveRange(oldClaims);
             
         var newTenantClaims = new List<TenantClaim>();
@@ -124,7 +146,25 @@ public class TenantService : BaseService,ITenantService,ITransientDependency
                 ClaimValue = item.ClaimValue
             });
         }
-        _unitOfWork.TenantClaimRepository.Entity.AddRange(newTenantClaims);
+        
+        var deletedClaims = oldClaims
+            .Except(newTenantClaims).Select(x=>new ClaimDto()
+            {
+                Type = x.ClaimType,
+                Value = x.ClaimValue
+            });
+        
+        var roleClaimsToDelete = tenantRoleCLaims
+            .Where(x => x.ClaimType == ExtendClaimTypes.Permission
+                        &&  deletedClaims.Any(x=>x.Value == x.Value));
+        
+        var userClaimsToDelete =  tenantUserClaims
+            .Where(x => x.ClaimType == ExtendClaimTypes.Permission
+                        &&  deletedClaims.Any(x=>x.Value == x.Value));
+           _unitOfWork.TenantClaimRepository.Entity.AddRange(newTenantClaims);
+           _unitOfWork.UserClaimRepository.Entity.RemoveRange(userClaimsToDelete);
+           _unitOfWork.RoleClaimRepository.Entity.RemoveRange(roleClaimsToDelete);
+
         _unitOfWork.SaveChange();
     }
 

@@ -1,5 +1,6 @@
 ﻿using Todo.Domain.BaseEntities;
 using Todo.Domain.Roles;
+using Todo.Domain.TenantClaims;
 using Todo.Domain.Users;
 
 namespace Todo.Domain.Tenants;
@@ -14,5 +15,6 @@ public class Tenant : Entity
     public bool IsDeleted { get; set; }
     
     public List<Role> Roles { get; set; }
-    
+    public List<TenantClaim> Claims { get; set; }
+
 }

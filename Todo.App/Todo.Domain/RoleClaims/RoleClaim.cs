@@ -5,5 +5,4 @@ namespace Todo.Domain.RoleClaims;
 
 public class RoleClaim :  IdentityRoleClaim<Guid>
 {
-    public Guid Id { get; set; } = Guid.NewGuid();
 }

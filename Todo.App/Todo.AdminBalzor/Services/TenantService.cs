@@ -41,4 +41,9 @@ public class TenantService :ITenantService,ITransientDependency
     {
          await _client.PutAPIAsync<Task>($"tenant/update-claims/{id}" , claims);
     }
+
+    public  async Task<List<ClaimDto>> GetClaims(Guid tenantId)
+    {
+       return  await _client.GetAPIAsync<List<ClaimDto>>($"tenant/get-claims/{tenantId.ToString()}");
+    }
 }

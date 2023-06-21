@@ -6,7 +6,7 @@ using Todo.Domain.Tenants;
 
 namespace Todo.Domain.Users;
 
-public class User : IdentityUser<Guid> ,ITenant
+public class User : IdentityUser<Guid> 
 {
     public string FirstName { get; set; }
     public string LastName { get; set; }
@@ -28,9 +28,7 @@ public class User : IdentityUser<Guid> ,ITenant
     public bool IsActive { get; set; }
     public bool IsDelete { get; set; }
 
-    public Guid? TenantId { get; set; }
-    
-    
-    //nav - properties
-    public Tenant Tenant { get; set; }
+    public List<Guid>? TenantIds { get; set; }
+
+
 }

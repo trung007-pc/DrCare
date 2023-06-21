@@ -9,4 +9,5 @@ public interface ITenantService
     Task<TenantDto> UpdateAsync(CreateUpdateTenantDto input,Guid id);
     Task DeleteAsync(Guid id);
     Task UpdateClaims(Guid id, List<CreateUpdateClaimDto> claims);
+    Task<List<ClaimDto>> GetClaims(Guid tenantId);
 }

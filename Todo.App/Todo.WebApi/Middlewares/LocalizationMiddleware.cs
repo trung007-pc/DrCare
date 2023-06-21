@@ -12,7 +12,6 @@ public class LocalizationMiddleware
     
     public async Task InvokeAsync(HttpContext context)
     {
-        
         var cultureKey = context.Request.Headers["Accept-Language"];
         if (!string.IsNullOrEmpty(cultureKey))
         {

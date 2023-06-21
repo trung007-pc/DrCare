@@ -1,5 +1,12 @@
-﻿@inherits LayoutComponentBase
+﻿@using Todo.Localziration
+@using System.Globalization
+@using Microsoft.AspNetCore.Components
+@using Todo.Core.Consts
+@inherits LayoutComponentBase
 @inject NavigationManager _navigationManager;
+@inject CookieHelper _cookieHelper;
+@inject Localizer L;
+
 <PageTitle>Todo.TenantBlazor</PageTitle>
 
 <MudLayout>
@@ -35,12 +42,27 @@
     </MudDrawer>
 
 
-    <MudDrawer @bind-Open="@_rightDrawerOpen"  Anchor="Anchor.End" ClipMode="DrawerClipMode.Never" Elevation="1" Variant="@DrawerVariant.Mini" Breakpoint="Breakpoint.Sm" Width="17vw" PreserveOpenState="false" Style="background-color: #161616;">
+    <MudDrawer @bind-Open="@_rightDrawerOpen"  Anchor="Anchor.End" ClipMode="DrawerClipMode.Never" Elevation="1" Variant="@DrawerVariant.Mini" Breakpoint="Breakpoint.Sm" Width="17vw" PreserveOpenState="false" Style="background-color: #161616;padding: 5px">
         <MudDrawerHeader Style="justify-content: center">
             <MudBadge Color="Color.Success" Overlap="true" Bordered="true">
                 <MudAvatar Image="https://fcb-abj-pre.s3.amazonaws.com/img/jugadors/MESSI.jpg"/>
             </MudBadge>
         </MudDrawerHeader>
+        <RadzenStack Orientation="Radzen.Orientation.Vertical" JustifyContent="JustifyContent.End" Style="flex: 1">
+                      <div style="display: flex;justify-content: space-between;align-items: center;gap: 2vw">
+                          <div>
+                              <RadzenDropDown @bind-Value=@SelectedCulture Data=@Cultures Change="OnChangeCulture">
+                                  <Template Context="data">
+                                      <RadzenImage Path="@(SetCultureImage(data))" Style="width: 100%;"/>
+                                  </Template>
+                                  <ValueTemplate Context="data">
+                                      <img src="@(SetCultureImage(data))" style="object-fit: cover;width: 28px"/>
+                                  </ValueTemplate>
+                              </RadzenDropDown>
+                          </div>
+                      </div>
+        </RadzenStack>
+
 
     </MudDrawer>
     <MudMainContent Style="padding: 15px">
@@ -61,10 +83,27 @@
 @code {
     bool _leftDrawerOpen = false;
     bool _rightDrawerOpen = false;
-
-    void NavigationTo(string route)
+    public string SelectedCulture;
+    public List<string> Cultures = new List<string>()
     {
-        _navigationManager.NavigateTo(route);
-    }
+        CultureCodes.VI,
+        CultureCodes.EN
+    };
 
+    public MainLayout()
+    {
+        SelectedCulture = Thread.CurrentThread.CurrentCulture.Name;
+    }
+    public void OnChangeCulture()
+    {
+        _cookieHelper.SetCookie("lang",SelectedCulture,1);
+        _navigationManager.NavigateTo(_navigationManager.Uri,true);
+    }
+    
+    public string SetCultureImage(string value)
+    {
+        if (CultureCodes.VI == value) return "Images/Cultures/dong_lao.png";
+        if (CultureCodes.EN == value) return "Images/Cultures/mi_den.png";
+        return "";
+    }
 }

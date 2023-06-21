@@ -15,6 +15,7 @@ public class ClientSetter
     public HttpClient GetClient(string name)
     {
        var _client = _factory.HttpClientAsync(name);
+       _client.DefaultRequestHeaders.Add("Accept-Language",Thread.CurrentThread.CurrentCulture.Name);
         var token = _cookieHelper.GetCookie("access-token");
         if (!string.IsNullOrEmpty(token))
         {

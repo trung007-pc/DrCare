@@ -65,7 +65,9 @@
   "Col": "Col",
   "Confirmation.Message": "Are you sure you want to confirm?",
 
-
+  "Title.New": "Create item",
+  "Title.EditingTitle": "Update item",
+  "Title.DeletingTitle": "Delete item",
   "Role": "Role",
   "User": "User",
   "User.UserName": "User Name",
@@ -88,5 +90,14 @@
   "User.DownloadInstructionFile": "Dowload A Sample File",
   "User.UploadExcelFile": "Upload Excel File",
   "User.InvalidFormat": "Invalid Format: ",
-  "User.InvalidLogics": "Invalid Logics: "
+  "User.InvalidLogics": "Invalid Logics: ",
+
+  "Validator.InValidFormat": "Invalid Format",
+  "Validator.User.IsRequired": "Not empty",
+
+  "Notification.Create": "Create successfully",
+  "Notification.Update": "Update successfully",
+  "Notification.Delete": "Delete successfully",
+  "Notification.SignIn": "Sign In successfully",
+  "Notification.SignOut": "Sign out successfully"
 }

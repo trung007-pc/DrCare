@@ -20,6 +20,8 @@ public partial class Role
     public string HeaderTitle = "Role";
     public TDModel NewModal;
     public TDModel EditingModal;
+    public TDModel DeletingModal = new TDModel();
+
     public TDModel ClaimModal;
     public Dictionary<string,List<ClaimItem>> Claims { get; set; }
     public bool CanAuthorize { get; set; }
@@ -59,7 +61,7 @@ public partial class Role
             var claims = await GetClaims(ExtendClaimTypes.Permission);
             CanCreate = claims.Any(x => x == AccessClaims.Roles.Create);
             CanEdit = claims.Any(x => x == AccessClaims.Roles.Edit);
-            CanCreate = claims.Any(x => x == AccessClaims.Roles.Create);
+            CanDelete = claims.Any(x => x == AccessClaims.Roles.Delete);
             CanAuthorize = claims.Any(x => x == AccessClaims.Roles.Authorize);
 
             CanCreate = true;
@@ -82,6 +84,8 @@ public partial class Role
                     
                     case FormActions.Delete:
                     {
+                        await ShowDeletingModal(role.Id);
+
                         break;
                     }
                     case FormActions.Edit:
@@ -121,19 +125,8 @@ public partial class Role
             
         }
         
-        public async Task DeleteRole(Guid id)
-        {
-            await InvokeAsync(async () =>
-            {
-                await _roleService.DeleteAsync(id);
-                HideEditingModal();
-                await GetRoles();
-            },ActionTypes.Delete,true);
-            
-        }
-
- 
-
+  
+        
         public async void ShowNewModal()
         {
             NewRole = new CreateUpdateRoleDto();
@@ -184,9 +177,9 @@ public partial class Role
         }
         
         
-        public async Task HideClaim()
+        public void  HideClaim()
         {
-            await ClaimModal.ShowModel();
+             ClaimModal.HideModel();
         }
 
         public async Task UpdateClaimsToRole()
@@ -208,6 +201,26 @@ public partial class Role
                 HideClaim();
             },ActionTypes.Update,true);
 
+        }
+        
+        
+        public async Task ShowDeletingModal(Guid id)
+        {
+            if (await DeletingModal.ShowConfirmModal() == true)
+            {
+                await DeleteUser(id);
+
+            }
+        }
+        
+        public async Task DeleteUser(Guid id)
+        {
+            await InvokeAsync(async () =>
+            {
+                await _roleService.DeleteAsync(id);
+                await GetRoles();
+              
+            },ActionTypes.Delete,true );
         }
         
      

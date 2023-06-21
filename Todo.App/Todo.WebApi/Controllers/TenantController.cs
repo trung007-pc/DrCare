@@ -50,4 +50,11 @@ public class TenantController : ITenantService
     {
         await _tenantService.UpdateClaims(id,claims);
     }
+
+    [HttpGet]
+    [Route("get-claims/{tenantId}")]
+    public async Task<List<ClaimDto>> GetClaims(Guid tenantId)
+    {
+       return  await _tenantService.GetClaims(tenantId);
+    }
 }

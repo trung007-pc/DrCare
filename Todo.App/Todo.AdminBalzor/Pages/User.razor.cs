@@ -26,6 +26,7 @@ public partial class User
 
         public TDModel NewModal = new TDModel();
         public TDModel EditingModal = new TDModel();
+        public TDModel DeletingModal = new TDModel();
         public TDModel ClaimModal;
 
         
@@ -69,11 +70,9 @@ public partial class User
             var claims = await GetClaims(ExtendClaimTypes.Permission);
             CanCreate = claims.Any(x => x == AccessClaims.Users.Create);
             CanEdit = claims.Any(x => x == AccessClaims.Users.Edit);
+            CanDelete = claims.Any(x => x == AccessClaims.Users.Delete);
             CanAuthorize = claims.Any(x => x == AccessClaims.Roles.Authorize);
-            CanCreate = true;
-            CanEdit = true;
-            CanCreate = true;
-            CanAuthorize = true;
+            
 
         }
         public async Task GetUsers()
@@ -119,6 +118,7 @@ public partial class User
                     
                     case FormActions.Delete:
                     {
+                        ShowDeletingModal(userWithNavigationProperties.User.Id);
                         break;
                     }
                     case FormActions.Edit:
@@ -194,25 +194,25 @@ public partial class User
                await _userService.UpdateUserClaims(EditingUserId, claims);
             },ActionTypes.Update,true);
         }
-        // public async Task DeleteUser(Guid id)
-        // {
-        //     await InvokeAsync(async () =>
-        //     {
-        //         await _userService.DeleteAsync(id);
-        //         await GetUsers();
-        //     },ActionTypes.Delete,true );
-        // }
-        //
-        //
-        // public async Task ShowConfirmMessage(Guid id)
-        // {
-        //     if ( await _messageService.Confirm( L["Confirmation.Message"], L["Confirmation"] ) )
-        //     {
-        //         await DeleteUser(id);
-        //     }
-        // }
-        //
-        //
+
+        public async Task ShowDeletingModal(Guid id)
+        {
+            if (await DeletingModal.ShowConfirmModal() == true)
+            {
+                await DeleteUser(id);
+            }
+        }
+        
+        public async Task DeleteUser(Guid id)
+        {
+            await InvokeAsync(async () =>
+            {
+                await _userService.DeleteAsync(id);
+                await GetUsers();
+            },ActionTypes.Delete,true );
+        }
+        
+        
         public async void ShowNewModal()
         {
             NewUser = new CreateUserDto();

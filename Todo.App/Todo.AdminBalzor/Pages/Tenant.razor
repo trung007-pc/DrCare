@@ -10,6 +10,7 @@
 @using ButtonType = Radzen.ButtonType
 @using AlignItems = Radzen.AlignItems
 @using Todo.AdminBlazor.Helper
+@using Todo.Contract.Validations
 @using Todo.Core.Consts.Permissions
 
 @inherits BaseBlazorPage
@@ -41,6 +42,8 @@
         <RadzenDataGridColumn TItem="TenantDto" Property="Name" Filterable="false" Title="Name" Frozen="true" Width="160px" TextAlign="TextAlign.Center"/>
         <RadzenDataGridColumn TItem="TenantDto" Property="StartDate" Title="Start Date" Frozen="true" Width="160px"/>
         <RadzenDataGridColumn TItem="TenantDto" Property="EndDate" Title="End Date" Frozen="true" Width="160px"/>
+        <RadzenDataGridColumn TItem="TenantDto" Property="PhoneNumber" Title="Phone Number" Frozen="true" Width="160px"/>
+        <RadzenDataGridColumn TItem="TenantDto" Property="IsActive" Title="Active" Frozen="true" Width="160px"/>
 
         <RadzenDataGridColumn TItem="TenantDto" Title="Action" Property="Id" Sortable="false" Width="160px">
             <Template Context="data">
@@ -68,9 +71,10 @@
 
 <TDModel @ref="NewModal">
     <RadzenAlert AlertStyle="AlertStyle.Info" ShowIcon="true" Variant="Variant.Flat" Shade="Shade.Lighter">
-        Editing Tenant
+        Creating Tenant
     </RadzenAlert>
     <EditForm Model="NewTenant" OnValidSubmit="async () => { await CreateTenant(); }">
+        <FluentValidator TValidator="TenantValidator"/>
 
         <RadzenStack Orientation="Radzen.Orientation.Vertical" AlignItems="AlignItems.Normal" Wrap="FlexWrap.Wrap">
 
@@ -83,7 +87,13 @@
             <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@L["EndDate"]</RadzenText>
             <RadzenDatePicker Class="w-100" @bind-Value="NewTenant.EndDate" DateFormat="dd/MM/yyyy"/>
             <ValidationMessage For="@(() => NewTenant.EndDate)"/>
-
+       
+            <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@L["PhoneNumber"]</RadzenText>
+            <RadzenTextBox Class="w-100" @bind-Value="NewTenant.PhoneNumber"/>
+            <ValidationMessage For="@(() => NewTenant.PhoneNumber)"/>
+                 <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" Style="display: inline">@L["User.IsActive"]</RadzenText>
+                        <RadzenSwitch @bind-Value=@NewTenant.IsActive />
+                        <ValidationMessage For="@(() => NewTenant.IsActive)"/>
             <RadzenStack Orientation="Radzen.Orientation.Horizontal" JustifyContent="JustifyContent.End">
                 <RadzenButton Text="@L["SaveChanges"]" BusyText="Saving ..." Icon="save" ButtonType="ButtonType.Submit" Size="ButtonSize.Large" IsBusy="IsDisable"/>
                 <RadzenButton ButtonStyle="ButtonStyle.Light" Icon="cancel" Click="@HideEditingModal" Size="ButtonSize.Large" Text="@L["Cancel"]" Disabled="IsDisable"/>
@@ -102,6 +112,7 @@
         Editing Tenant
     </RadzenAlert>
     <EditForm Model="EditingTenant" OnValidSubmit="async () => { await UpdateTenant(); }">
+        <FluentValidator TValidator="TenantValidator"/>
 
         <RadzenStack Orientation="Radzen.Orientation.Vertical" AlignItems="AlignItems.Normal" Wrap="FlexWrap.Wrap">
 
@@ -114,6 +125,11 @@
             <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@L["EndDate"]</RadzenText>
             <RadzenDatePicker Class="w-100" @bind-Value="EditingTenant.EndDate" DateFormat="dd/MM/yyyy"/>
             <ValidationMessage For="@(() => EditingTenant.EndDate)"/>
+
+            <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" Style="display: inline">@L["User.IsActive"]</RadzenText>
+            <RadzenSwitch @bind-Value=@EditingTenant.IsActive />
+            <ValidationMessage For="@(() => EditingTenant.IsActive)"/>
+
             <RadzenStack Orientation="Radzen.Orientation.Horizontal" JustifyContent="JustifyContent.End">
                 <RadzenButton Text="@L["SaveChanges"]" BusyText="Saving ..." Icon="save" ButtonType="ButtonType.Submit" Size="ButtonSize.Large" IsBusy="IsDisable"/>
                 <RadzenButton ButtonStyle="ButtonStyle.Light" Icon="cancel" Click="@HideEditingModal" Size="ButtonSize.Large" Text="@L["Cancel"]" Disabled="IsDisable"/>
@@ -156,4 +172,11 @@
 
     </RadzenTabs>
 
+</TDModel>
+
+
+
+<TDModel @ref="DeletingModal" ConfirmMessage="@L["Confirmation.Message"]" Title="@L["Title.Delete"]" ShowTitle="true">
+
+    
 </TDModel>

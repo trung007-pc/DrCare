@@ -2,7 +2,25 @@
   "Api:0001": "Item not found",
   "Api:0002": "Item Already Exist",
   "Api:0003": "Email Already Exist",
+  "Api:0006": "Invalid Time Range ",
+
 
   "User:0001": "Incorrect login information please check again",
-  "User:0002": "Item Already Exist"
+  "User:0002": "Item Already Exist",
+  "Tenant:0001": "The phone number name already exists in the system. Please choose another number",
+  "Tenant:0002": "Name already exist",
+
+
+
+
+  "InvalidUserName": "Invalid User Name",
+  "InvalidEmail": "Invalid Email",
+  "DuplicateUserName": "Duplicate User Name",
+  "DuplicateEmail": "Duplicate Email",
+  "InvalidRoleName": "Invalid Role Name",
+  "DuplicateRoleName": "Duplicate Role Name",
+  "UserAlreadyInRole":  "User Already In Role",
+  "UserNotInRole": "User Not In Role",
+  "PasswordTooShort": "Password Too Short",
+  "PasswordRequiresUniqueChars": "Password Requires Unique Chars"
 }

@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using System.Net;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Todo.Core.Consts.ErrorCodes;
 using Todo.Core.DependencyRegistrationTypes;
 using Todo.Domain.Roles;
 using Todo.Domain.Tenants;
@@ -6,6 +9,7 @@ using Todo.Domain.UserRoles;
 using Todo.Domain.Users;
 using Todo.Localziration;
 using Todo.MongoDb.Repositorys;
+using Todo.Service.Exceptions;
 
 namespace Todo.Service.Users;
 
@@ -13,9 +17,11 @@ public class SharedUserService : IScopeDependency
 {
     private UserManager<User> _userManager;
     private UnitOfWork _unitOfWork { get; set; }
-    public SharedUserService(UserManager<User> userManager,Localizer localizer)
+    private Localizer L { get; set; }
+    public SharedUserService(UserManager<User> userManager,Localizer l)
     {
         _userManager = userManager;
+        L = l;
     }
 
     public void InjectUnitOfWork(UnitOfWork unitOfWork)
@@ -40,11 +46,18 @@ public class SharedUserService : IScopeDependency
             LastName = "Nguyen",
             UserName = tenant.PhoneNumber,
             NormalizedUserName = tenant.PhoneNumber.ToUpper(),
-            TenantId = tenant.Id
+            PhoneNumber = tenant.PhoneNumber,
+            TenantIds = new List<Guid>(){tenant.Id}
         };
+        var userRepo = _unitOfWork.UserRepository;
         user.PasswordHash = _userManager.PasswordHasher.HashPassword(user,"admin");
-        _unitOfWork.UserRepository.Entity.Add(user);
 
+
+        if (await userRepo.Entity.IgnoreQueryFilters().AnyAsync(x => x.UserName == user.UserName))
+        {
+            throw new GlobalException(L[TenantErrorCode.PhoneNumberAlreadyExist], HttpStatusCode.BadRequest);
+        }
+        userRepo.Entity.Add(user);
         
         await _unitOfWork.UserRepository.Entity.AddAsync(user); 
         await _unitOfWork

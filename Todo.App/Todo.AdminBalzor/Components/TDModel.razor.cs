@@ -10,7 +10,10 @@ public partial class TDModel : ComponentBase{
     [Parameter] public string Style { get; set; }
     [Parameter] public string Title { get; set; }
     [Parameter] public bool ShowTitle { get; set; }
+    
+    [Parameter] public string ConfirmMessage { get; set; }
 
+    
 
     public TDModel()
     {

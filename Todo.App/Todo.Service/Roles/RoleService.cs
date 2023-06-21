@@ -47,7 +47,7 @@ public class RoleService :BaseService,IRoleService,ITransientDependency
             var result = await _roleManager.CreateAsync(role);
             if (!result.Succeeded)
             {
-                throw new GlobalException(result.Errors.FirstOrDefault().Code, HttpStatusCode.BadRequest);
+                throw new GlobalException(L[result.Errors?.FirstOrDefault().Code], HttpStatusCode.BadRequest);
             }
 
             return ObjectMapper.Map<Role,RoleDto>(role);
@@ -69,7 +69,7 @@ public class RoleService :BaseService,IRoleService,ITransientDependency
             
             if (!result.Succeeded)
             {
-                throw new GlobalException(result.Errors?.FirstOrDefault().Code, HttpStatusCode.BadRequest);
+                throw new GlobalException(L[result.Errors?.FirstOrDefault().Code], HttpStatusCode.BadRequest);
 
             }
             
@@ -81,14 +81,14 @@ public class RoleService :BaseService,IRoleService,ITransientDependency
             var role = await _roleManager.FindByIdAsync(id.ToString());
             if (role == null)
             {
-                throw new GlobalException(BaseErrorCode.NotFound, HttpStatusCode.BadRequest);
+                throw new GlobalException(L[BaseErrorCode.NotFound], HttpStatusCode.BadRequest);
             }
 
             var result = await _roleManager.DeleteAsync(role);
             
             if (!result.Succeeded)
             {
-                throw new GlobalException(result.Errors?.FirstOrDefault().Code, HttpStatusCode.BadRequest);
+                throw new GlobalException(L[result.Errors?.FirstOrDefault().Code], HttpStatusCode.BadRequest);
 
             }
         }

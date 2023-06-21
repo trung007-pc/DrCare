@@ -17,6 +17,7 @@ using Todo.Domain.Roles;
 using Todo.Domain.UserRoles;
 using Todo.Domain.Users;
 using Todo.Localziration;
+using Todo.MongoDb.PostgreSQL;
 using Todo.MongoDb.Repositorys;
 using Todo.Service.Exceptions;
 using BCryptNet = BCrypt.Net.BCrypt;
@@ -27,18 +28,23 @@ public class UserService : BaseService,IUserService,ITransientDependency
 {
     private readonly UnitOfWork _unitOfWork;
     private IConfiguration _configuration;
-    private  Localizer _localizer { get; set; }
+    private  Localizer L { get; set; }
     private UserManager<User> _userManager { get; set; }
     private RoleManager<Role> _rolerManager { get; set; }
 
+    private TenantContext _tenantContext { get; set; }
 
-    public UserService(UnitOfWork unitOfWork,Localizer localizer,UserManager<User> userManager,RoleManager<Role> rolerManager,IConfiguration configuration)
+    public UserService(UnitOfWork unitOfWork,
+        Localizer l,UserManager<User> userManager,RoleManager<Role> rolerManager,
+        TenantContext tenantContext,
+        IConfiguration configuration)
     {
         _unitOfWork = unitOfWork;
-        _localizer = localizer;
+        L = l;
         _userManager = userManager;
         _configuration = configuration;
         _rolerManager = rolerManager;
+        _tenantContext = tenantContext;
     }
     
      public async Task<List<UserWithNavigationPropertiesDto>> GetListWithNavigationAsync()
@@ -77,7 +83,7 @@ public class UserService : BaseService,IUserService,ITransientDependency
             if (!result.Succeeded)
             {
                 
-                throw new GlobalException(result.Errors?.FirstOrDefault().Code, HttpStatusCode.BadRequest);
+                throw new GlobalException(L[result.Errors?.FirstOrDefault().Code], HttpStatusCode.BadRequest);
             }
             
             
@@ -87,7 +93,7 @@ public class UserService : BaseService,IUserService,ITransientDependency
                 var reuslt = await _userManager.ResetPasswordAsync(user, token, input.Password);
                 if (!reuslt.Succeeded)
                 {
-                    throw new GlobalException(reuslt.Errors?.FirstOrDefault().Code, HttpStatusCode.BadRequest);
+                    throw new GlobalException(L[result.Errors?.FirstOrDefault().Code], HttpStatusCode.BadRequest);
                 }
             }
             
@@ -107,7 +113,7 @@ public class UserService : BaseService,IUserService,ITransientDependency
             var userResult = await _userManager.UpdateAsync(item);
             if (!userResult.Succeeded)
             {
-                throw new GlobalException(userResult.Errors.FirstOrDefault().Code, HttpStatusCode.BadRequest);
+                throw new GlobalException(L[userResult.Errors?.FirstOrDefault().Code], HttpStatusCode.BadRequest);
             }
         }
 
@@ -123,11 +129,21 @@ public class UserService : BaseService,IUserService,ITransientDependency
         {
             
             var user = ObjectMapper.Map<CreateUserDto, User>(input);
+            if (_tenantContext.TenantId.HasValue)
+            {
+                user.TenantIds.Add(_tenantContext.TenantId.Value);
+            }
+
+            if (await _unitOfWork.UserRepository.Entity.IgnoreQueryFilters().AnyAsync(x => x.UserName == user.UserName))
+            {
+                throw new GlobalException(L[UserErrorCode.UserNameAlreadyExist], HttpStatusCode.BadRequest);
+            }
+            
             
             var result = await _userManager.CreateAsync(user, input.Password);
             if (!result.Succeeded)
             {
-                throw new GlobalException(result.Errors?.FirstOrDefault().Code, HttpStatusCode.BadRequest);
+                throw new GlobalException(L[result.Errors?.FirstOrDefault().Code], HttpStatusCode.BadRequest);
             }
 
             return ObjectMapper.Map<User, UserDto>(user);
@@ -150,7 +166,7 @@ public class UserService : BaseService,IUserService,ITransientDependency
             var result = await _userManager.UpdateAsync(user);
             if (!result.Succeeded)
             {
-                throw new GlobalException(result.Errors?.FirstOrDefault().Code, HttpStatusCode.BadRequest);
+                throw new GlobalException(L[result.Errors?.FirstOrDefault().Code], HttpStatusCode.BadRequest);
             }
 
             return ObjectMapper.Map<User, UserDto>(user);
@@ -179,12 +195,11 @@ public class UserService : BaseService,IUserService,ITransientDependency
         public async Task<TokenDto> SignInAsync(LoginRequestDto request)
         {
             var user = await _userManager.FindByNameAsync(request.UserName);
-            user.IsActive = true;
             if (user == null|| !user.IsActive|| user.IsDelete)
             {
                 throw new GlobalException(BaseErrorCode.InvalidRequirement, HttpStatusCode.BadRequest);
             }
-
+              
 
             var result = await _userManager.CheckPasswordAsync(user, request.Password);
             if (!result)
@@ -296,7 +311,7 @@ public class UserService : BaseService,IUserService,ITransientDependency
                 .Select(x=>new Claim(x.ClaimType,x.ClaimValue));
             claims.AddRange(roleClaims);
             claims.AddRange(userClaims);
-            claims.Add(new Claim(ExtendClaimTypes.Tenant,user.TenantId == null ? "" : user.TenantId.ToString()));
+            claims.Add(new Claim(ExtendClaimTypes.Tenant,_tenantContext.TenantId == null ? "" : _tenantContext.TenantId.ToString()));
             claims.Add(new Claim(ClaimTypes.PrimarySid, user.Id.ToString()));
             claims.Add(new Claim(ClaimTypes.Name, user.UserName));
             claims.Add(new Claim(ClaimTypes.Surname,user.FirstName +" "+ user.LastName));

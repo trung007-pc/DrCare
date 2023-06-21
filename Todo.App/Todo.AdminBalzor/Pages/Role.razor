@@ -1,5 +1,5 @@
 ﻿@page "/roles"
-@* @attribute [Authorize(AccessClaims.Roles.Default)] *@
+@attribute [Authorize(AccessClaims.Roles.Default)]
 @inject RoleService _roleService;
 @inject Localizer L;
 @using Todo.AdminBlazor.Services
@@ -11,6 +11,8 @@
 @using AlignItems = Radzen.AlignItems
 @using Todo.AdminBlazor.Helper
 @using Todo.Core.Consts.Permissions
+@using Microsoft.AspNetCore.Identity
+@using Todo.Contract.Validations
 
 @inherits BaseBlazorPage
 
@@ -68,9 +70,10 @@
 
 <TDModel @ref="NewModal">
     <RadzenAlert AlertStyle="AlertStyle.Info" ShowIcon="true" Variant="Variant.Flat" Shade="Shade.Lighter">
-        Editing Role
+        Creating Role
     </RadzenAlert>
     <EditForm Model="NewRole" OnValidSubmit="async () => { await CreateRole(); }">
+        <FluentValidator TValidator="RoleValidator"/>
 
         <RadzenStack Orientation="Radzen.Orientation.Vertical" AlignItems="AlignItems.Normal" Wrap="FlexWrap.Wrap">
 
@@ -101,7 +104,7 @@
         Editing Role
     </RadzenAlert>
     <EditForm Model="EditingRole" OnValidSubmit="async () => { await UpdateRole(); }">
-
+        <FluentValidator TValidator="RoleValidator"/>
         <RadzenStack Orientation="Radzen.Orientation.Vertical" AlignItems="AlignItems.Normal" Wrap="FlexWrap.Wrap">
 
             <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@L["Name"]</RadzenText>
@@ -157,4 +160,9 @@
 
     </RadzenTabs>
 
+</TDModel>
+
+<TDModel @ref="DeletingModal" ConfirmMessage="@L["Confirmation.Message"]" Title="@L["Title.Delete"]" ShowTitle="true">
+
+    
 </TDModel>

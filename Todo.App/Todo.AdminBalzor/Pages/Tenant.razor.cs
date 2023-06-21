@@ -20,6 +20,8 @@ public partial class Tenant
     public TDModel NewModal;
     public TDModel EditingModal;
     public TDModel ClaimModal;
+    public TDModel DeletingModal;
+
     public Dictionary<string,List<ClaimItem>> Claims { get; set; }
     public bool CanAuthorize { get; set; }
     
@@ -58,7 +60,7 @@ public partial class Tenant
             var claims = await GetClaims(ExtendClaimTypes.Permission);
             CanCreate = claims.Any(x => x == AccessClaims.Tenants.Create);
             CanEdit = claims.Any(x => x == AccessClaims.Tenants.Edit);
-            CanCreate = claims.Any(x => x == AccessClaims.Tenants.Create);
+            CanDelete = claims.Any(x => x == AccessClaims.Tenants.Delete);
             CanAuthorize = claims.Any(x => x == AccessClaims.Tenants.Authorize);
         }
         public async Task GetTenants()
@@ -76,6 +78,7 @@ public partial class Tenant
                     
                     case FormActions.Delete:
                     {
+                        await ShowDeletingModal(tenant.Id);
                         break;
                     }
                     case FormActions.Edit:
@@ -155,12 +158,19 @@ public partial class Tenant
 
         public  async Task ShowClaim(Guid id)
         {
-           Claims =  SecurityHelper.GetClaims();
-           // var tenantClaims = await _tenantService.GetClaims(id);
-           // MarkClaimsSelection(tenantClaims);
-           EditingTenantId = id;
-           await ClaimModal.ShowModel();
+            await InvokeAsync(async () =>
+            {
+                Claims =  SecurityHelper.GetClaims();
+                var tenantClaims = await _tenantService.GetClaims(id);
+                MarkClaimsSelection(tenantClaims);
+                EditingTenantId = id;
+              
+               
+            },ActionTypes.GetList);
+            await ClaimModal.ShowModel();
+ 
         }
+        
 
         public void MarkClaimsSelection(List<ClaimDto> tenantClaims)
         {
@@ -178,9 +188,9 @@ public partial class Tenant
         }
         
         
-        public async Task HideClaim()
+        public  void HideClaim()
         {
-            await ClaimModal.ShowModel();
+             ClaimModal.HideModel();
         }
 
         public async Task UpdateClaimsToTenant()
@@ -199,8 +209,25 @@ public partial class Tenant
             await InvokeAsync(async () =>
             {
                 await _tenantService.UpdateClaims(EditingTenantId,claims);
-                HideClaim();
+                
             },ActionTypes.Update,true);
+            HideClaim();
+        }
         
+        public async Task ShowDeletingModal(Guid id)
+        {
+            if (await DeletingModal.ShowConfirmModal() == true)
+            {
+                await DeleteUser(id);
+            }
+        }
+        
+        public async Task DeleteUser(Guid id)
+        {
+            await InvokeAsync(async () =>
+            {
+                await _tenantService.DeleteAsync(id);
+                await GetTenants();
+            },ActionTypes.Delete,true );
         }
 }

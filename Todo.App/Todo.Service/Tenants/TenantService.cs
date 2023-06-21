@@ -1,5 +1,6 @@
 ﻿using System.Linq.Dynamic.Core;
 using System.Net;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -9,6 +10,7 @@ using Todo.Core.Consts.ErrorCodes;
 using Todo.Core.Consts.Permissions;
 using Todo.Core.DependencyRegistrationTypes;
 using Todo.Domain.RoleClaims;
+using Todo.Domain.TenantClaims;
 using Todo.Domain.Tenants;
 using Todo.Domain.Users;
 using Todo.Localziration;
@@ -22,7 +24,6 @@ public class TenantService : BaseService,ITenantService,ITransientDependency
 {
     private readonly UnitOfWork _unitOfWork;
     private  Localizer _localizer { get; set; }
-    private UserManager<User> _userManager { get; set; }
     private SharedUserService _sharedUserService { get; set; }
 
     
@@ -45,10 +46,11 @@ public class TenantService : BaseService,ITenantService,ITransientDependency
         var tenantRepository = _unitOfWork.TenantRepository;
         HandleInput(input);
         
-        if (tenantRepository.Entity.Any(x => x.Name == input.Name))
+        if (tenantRepository.Entity.Any(x => x.PhoneNumber == input.PhoneNumber))
         {
-            throw new GlobalException(_localizer[BaseErrorCode.ItemAlreadyExist], HttpStatusCode.BadRequest);
+            throw new GlobalException(_localizer[TenantErrorCode.PhoneNumberAlreadyExist], HttpStatusCode.BadRequest);
         }
+       
 
         var tenant = ObjectMapper.Map<CreateUpdateTenantDto, Tenant>(input);
 
@@ -71,11 +73,7 @@ public class TenantService : BaseService,ITenantService,ITransientDependency
             throw new GlobalException(_localizer[BaseErrorCode.NotFound], HttpStatusCode.BadRequest);
         }
         
-        if (tenantRepository.Entity.Any(x => x.Name == input.Name  && x.Id!= id))
-        {
-            throw new GlobalException(_localizer[BaseErrorCode.ItemAlreadyExist], HttpStatusCode.BadRequest);
-        }
-
+        input.PhoneNumber = tenant.PhoneNumber;
         tenant = ObjectMapper.Map(input,tenant);
 
         tenantRepository.Entity.Update(tenant);
@@ -101,8 +99,8 @@ public class TenantService : BaseService,ITenantService,ITransientDependency
     
     public async Task UpdateClaims(Guid id, List<CreateUpdateClaimDto> claims)
     {
-        var role = await  _unitOfWork.RoleRepository.Entity.FirstOrDefaultAsync(x=>x.Id == id);
-        if (role == null)
+        var tenant = await  _unitOfWork.TenantRepository.Entity.FirstOrDefaultAsync(x=>x.Id == id);
+        if (tenant == null)
         {
             throw new GlobalException(_localizer[BaseErrorCode.NotFound], HttpStatusCode.BadRequest);
         }
@@ -112,24 +110,45 @@ public class TenantService : BaseService,ITenantService,ITransientDependency
             throw new GlobalException(_localizer[BaseErrorCode.InvalidRequirement], HttpStatusCode.BadRequest);
         }
             
-        var oldClaims = _unitOfWork.RoleClaimRepository
-            .Entity.Where(x => x.RoleId == id);
-        _unitOfWork.RoleClaimRepository.Entity.RemoveRange(oldClaims);
+        var oldClaims = _unitOfWork.TenantClaimRepository
+            .Entity.Where(x => x.TenantId == id);
+        _unitOfWork.TenantClaimRepository.Entity.RemoveRange(oldClaims);
             
-        var newRoleClaims = new List<RoleClaim>();
+        var newTenantClaims = new List<TenantClaim>();
         foreach (var item in claims)
         {
-            newRoleClaims.Add(new RoleClaim()
+            newTenantClaims.Add(new TenantClaim()
             {
-                RoleId = id,
+                TenantId = id,
                 ClaimType = item.ClaimType,
                 ClaimValue = item.ClaimValue
             });
         }
-        _unitOfWork.RoleClaimRepository.Entity.AddRange(newRoleClaims);
+        _unitOfWork.TenantClaimRepository.Entity.AddRange(newTenantClaims);
         _unitOfWork.SaveChange();
     }
-    
+
+    public async Task<List<ClaimDto>> GetClaims(Guid tenantId)
+    {
+        var tenant = await  _unitOfWork.TenantRepository
+            .Entity.FirstOrDefaultAsync(x => x.Id == tenantId);
+        if (tenant == null)
+        {
+            throw new GlobalException(_localizer[BaseErrorCode.NotFound], HttpStatusCode.BadRequest);
+        }
+
+       var claims = await _unitOfWork.TenantClaimRepository
+            .Entity
+            .Where(x => x.TenantId == tenantId)
+            .Select(x=>new ClaimDto()
+            {
+                Type = x.ClaimType,
+                Value = x.ClaimValue
+            }).ToListAsync();
+       
+        return  claims;
+    }
+
     private bool CheckAllowedClaimType(List<CreateUpdateClaimDto> Claims)
     {
         var types = new List<string>()
@@ -151,5 +170,10 @@ public class TenantService : BaseService,ITenantService,ITransientDependency
     public void HandleInput(CreateUpdateTenantDto input)
     {
         input.Name = input.Name.Trim();
+        if (input.StartDate >= input.EndDate || input.EndDate <= DateTime.Now && input.IsActive)
+        {
+            throw new GlobalException(_localizer[BaseErrorCode.InvalidTimeRange], HttpStatusCode.BadRequest);
+        }
+        
     }
 }

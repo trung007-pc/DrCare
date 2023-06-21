@@ -18,7 +18,6 @@ builder.Services.InstallServices(builder.Configuration);
 
 
 var app = builder.Build();
-app.UseMiddleware<MultiTenantServiceMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -27,16 +26,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-
-
+app.UseMiddleware<MultiTenantServiceMiddleware>();
 app.UseMiddleware<LocalizationMiddleware>();
 app.UseMiddleware<GlobalErrorHandlingMiddleware>();
-// app.UseStaticFiles(new StaticFileOptions
-// {
-//     FileProvider = new PhysicalFileProvider(
-//         Path.Combine(builder.Environment.ContentRootPath, "wwwroot")),
-//     RequestPath = "/a1s3s4e5tss"
-// });
+
 app.UseHttpsRedirection();
 
 app.UseAuthentication();

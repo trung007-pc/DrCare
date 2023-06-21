@@ -1,4 +1,5 @@
 ﻿@page "/users"
+@attribute [Authorize(AccessClaims.Users.Default)]
 @using ButtonType = Radzen.ButtonType
 @inject UserService _userService;
 @inherits BaseBlazorPage
@@ -9,8 +10,10 @@
 @using Todo.AdminBlazor.Services
 @using Todo.Contract.Users
 @using Todo.Contract.Validations
+@using Todo.Core.Consts.Permissions
 @using Todo.Core.Enums
 @using Todo.Localziration
+@using Variant = Radzen.Variant
 @inject Localizer L;
 @inject IAuthorizationService AuthorizationService
 
@@ -110,11 +113,14 @@
 
 <TDModel @ref="NewModal" Width="70vw">
 
+       <RadzenAlert AlertStyle="AlertStyle.Info" ShowIcon="true" Variant="Variant.Flat" Shade="Shade.Lighter">
+            Creating User
+        </RadzenAlert>
     <EditForm Model="NewUser" OnValidSubmit="async () => { await CreateUser(); }">
         <RadzenTabs RenderMode="TabRenderMode.Client">
             <Tabs>
                 <RadzenTabsItem Text="@L["User"]">
-                    <DataAnnotationsValidator/>
+                    <FluentValidator TValidator="CreateUserValidator"/>
                     <RadzenStack Orientation="Radzen.Orientation.Vertical" JustifyContent="JustifyContent.End">
 
                         <RadzenStack Orientation="Radzen.Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween">
@@ -204,16 +210,16 @@
 
                 </RadzenTabsItem>
                 <RadzenTabsItem Text="@L["User.Role"]">
-                   <RadzenCheckBoxList Style="outline: none" TValue="Guid" @bind-Value="SelectedRoleIds" AllowSelectAll="true" Orientation="Radzen.Orientation.Vertical">
-                                        <Items >
-            
-                                            @foreach (var item in Roles)
-                                            {
-                                                <RadzenCheckBoxListItem Text="@item.Name" Value="@item.Id"/>
-                                            }
-            
-                                        </Items>
-                                    </RadzenCheckBoxList>
+                    <RadzenCheckBoxList Style="outline: none" TValue="Guid" @bind-Value="SelectedRoleIds" AllowSelectAll="true" Orientation="Radzen.Orientation.Vertical">
+                        <Items >
+
+                            @foreach (var item in Roles)
+                            {
+                                <RadzenCheckBoxListItem Text="@item.Name" Value="@item.Id"/>
+                            }
+
+                        </Items>
+                    </RadzenCheckBoxList>
 
                 </RadzenTabsItem>
             </Tabs>
@@ -230,12 +236,14 @@
 </TDModel>
 
 <TDModel @ref="EditingModal" Width="70vw">
-
+  <RadzenAlert AlertStyle="AlertStyle.Info" ShowIcon="true" Variant="Variant.Flat" Shade="Shade.Lighter">
+            Editing User
+        </RadzenAlert>
     <EditForm Model="EditingUser" OnValidSubmit="async () => { await UpdateUser(); }">
         <RadzenTabs RenderMode="TabRenderMode.Client">
             <Tabs>
                 <RadzenTabsItem Text="@L["User"]">
-                   <FluentValidator TValidator="MUserValidator"/>
+                    <FluentValidator TValidator="UpdateUserValidator"/>
                     <RadzenStack Orientation="Radzen.Orientation.Vertical" JustifyContent="JustifyContent.End">
 
                         <RadzenStack Orientation="Radzen.Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween">
@@ -245,9 +253,9 @@
                                 <ValidationMessage For="@(() => EditingUser.FirstName)"/>
                             </div>
                             <div style="flex-basis: 50%">
-                                     <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@L["User.Email"]</RadzenText>
-                                                             <RadzenTextBox Class="w-100" @bind-Value="EditingUser.Email"/>
-                                                             <ValidationMessage For="@(() => EditingUser.Email)"/>
+                                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@L["User.Email"]</RadzenText>
+                                <RadzenTextBox Class="w-100" @bind-Value="EditingUser.Email"/>
+                                <ValidationMessage For="@(() => EditingUser.Email)"/>
 
                             </div>
 
@@ -260,9 +268,9 @@
                                 <ValidationMessage For="@(() => EditingUser.LastName)"/>
                             </div>
                             <div style="flex-basis: 50%">
-                            <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@L["User.DOB"]</RadzenText>
-                                                        <RadzenDatePicker @bind-Value=@EditingUser.DOB DateFormat="dd/MM/yyyy" Class="w-100"/>
-                                                        <ValidationMessage For="@(() => EditingUser.DOB)"/>
+                                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@L["User.DOB"]</RadzenText>
+                                <RadzenDatePicker @bind-Value=@EditingUser.DOB DateFormat="dd/MM/yyyy" Class="w-100"/>
+                                <ValidationMessage For="@(() => EditingUser.DOB)"/>
 
                             </div>
 
@@ -275,8 +283,8 @@
                                 <ValidationMessage For="@(() => EditingUser.PhoneNumber)"/>
                             </div>
                             <div style="flex-basis: 50%">
-                            
-          <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@L["User.Gender"]</RadzenText>
+
+                                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">@L["User.Gender"]</RadzenText>
                                 <RadzenRadioButtonList @bind-Value="EditingUser.Gender" Style="display:flex;margin-bottom: 10px">
                                     <Items>
                                         @foreach (var item in (Gender[]) Enum.GetValues(typeof(Gender)))
@@ -291,13 +299,13 @@
                         </RadzenStack>
                         <RadzenStack Orientation="Radzen.Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" AlignItems="Radzen.AlignItems.Center">
                             <div style="flex-basis: 50%">
-                                 <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" Style="display: inline">@L["User.IsActive"]</RadzenText>
-                                                        <RadzenSwitch @bind-Value=@EditingUser.IsActive />
-                                                        <ValidationMessage For="@(() => EditingUser.IsActive)"/>
+                                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" Style="display: inline">@L["User.IsActive"]</RadzenText>
+                                <RadzenSwitch @bind-Value=@EditingUser.IsActive />
+                                <ValidationMessage For="@(() => EditingUser.IsActive)"/>
 
                             </div>
                             <div style="flex-basis: 50%">
-                      
+
 
                                 <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" Style="display: inline">@L["User.ResetPassword"]</RadzenText>
                                 <RadzenSwitch @bind-Value=@EditingUser.IsSetPassword/>
@@ -316,22 +324,22 @@
 
 
                         </RadzenStack>
-                   
+
 
                     </RadzenStack>
 
 
                 </RadzenTabsItem>
                 <RadzenTabsItem Text="@L["User.Role"]">
-                          <RadzenCheckBoxList Style="outline: none" TValue="Guid" @bind-Value="SelectedRoleIds" AllowSelectAll="true" Orientation="Radzen.Orientation.Vertical">
-                                                <Items >
-                                                    @foreach (var item in Roles)
-                                                    {
-                                                        <RadzenCheckBoxListItem Text="@item.Name" Value="@item.Id"/>
-                                                    }
-                    
-                                                </Items>
-                                            </RadzenCheckBoxList>
+                    <RadzenCheckBoxList Style="outline: none" TValue="Guid" @bind-Value="SelectedRoleIds" AllowSelectAll="true" Orientation="Radzen.Orientation.Vertical">
+                        <Items >
+                            @foreach (var item in Roles)
+                            {
+                                <RadzenCheckBoxListItem Text="@item.Name" Value="@item.Id"/>
+                            }
+
+                        </Items>
+                    </RadzenCheckBoxList>
 
                 </RadzenTabsItem>
             </Tabs>
@@ -376,4 +384,9 @@
 
     </RadzenTabs>
 
+</TDModel>
+
+<TDModel @ref="DeletingModal" ConfirmMessage="@L["Confirmation.Message"]" Title="@L["Title.Delete"]" ShowTitle="true">
+
+    
 </TDModel>

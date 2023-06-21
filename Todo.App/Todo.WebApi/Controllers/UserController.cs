@@ -30,7 +30,7 @@ public class UserController : IUserService
     }
 
     [HttpDelete]
-    [Route("delete-with-navigation-properties")]
+    [Route("delete-with-navigation-properties/{id}")]
     public Task DeleteWithNavigationPropertiesAsync(Guid id)
     {
         throw new NotImplementedException();
@@ -43,6 +43,7 @@ public class UserController : IUserService
     }
     
     [HttpDelete]
+    [Route("{id}")]
     public async Task DeleteAsync(Guid id)
     {
         await _userService.DeleteAsync(id);

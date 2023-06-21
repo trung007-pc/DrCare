@@ -6,21 +6,10 @@ using Todo.Domain.Roles;
 using Todo.Domain.Users;
 
 
-var client = new MongoClient("mongodb://localhost:27017/");
-var database = client.GetDatabase("MyTodo");
 
-var roles = database.GetCollection<Role>("Roles");
-
-using (var session = client.StartSession())
+for (int i = 0; i < 5; i++)
 {
-    session.StartTransaction();
-    roles.InsertOne(new Role()
-    {
-        Name = "a11v1111111c",
-        Code = "abs"
-    });
-
+    Console.WriteLine(Guid.NewGuid());
 }
 
-
-
+Console.ReadKey();

@@ -123,7 +123,11 @@
   "SelectAgency": "Chọn Cơ Quan",
   "SelectType": "Chọn Kiểu",
 
-  "Role": "Vai trò",
+
+  "Title.New": "Tạo mới item",
+  "Title.EditingTitle": "Cập nhật item",
+  "Title.DeletingTitle": "Xóa item",
+
   "User": "Người dùng",
   "User.UserName": "Tên tài khoản",
   "User.EmployeeCode": "Mã nhân viên",
@@ -142,5 +146,15 @@
   "User.PasswordConfirmation": "Nhập lại mật khẩu",
   "User.ImportExcelFile": "Import Excel File",
   "User.DownloadSampleFile": "Tải file mẫu",
-  "User.DownloadInstructionFile": "Tải file mẫu"
+  "User.DownloadInstructionFile": "Tải file mẫu",
+  
+  "Notification.Create": "Tạo thành công",
+  "Notification.Update": "Cập nhật thành công",
+  "Notification.Delete": "Xóa thành công",
+  "Notification.SignIn": "Đăng nhập thành công",
+  "Notification.SignOut": "Đăng xuất thành công",
+  
+  "Validator.InValidFormat": "Không đúng định dạng",
+  "Validator.IsRequired": "Không được bỏ trống"
+  
 }

@@ -1,5 +1,6 @@
 using System.Reflection;
 using Blazored.LocalStorage;
+using FluentValidation;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
@@ -7,6 +8,7 @@ using MudBlazor;
 using MudBlazor.Services;
 using Radzen;
 using Todo.AdminBlazor.Data;
+using Todo.AdminBlazor.Middlewares;
 using Todo.AdminBlazor.Network;
 using Todo.AdminBlazor.Security;
 using Todo.AdminBlazor.ServiceInstallers;
@@ -49,20 +51,7 @@ builder.Services.InstallServices(builder.Configuration);
 
 
 
-var executingAssembly = Assembly.GetExecutingAssembly();
-var referencedAssemblies = executingAssembly.GetReferencedAssemblies();
 
-foreach (var assemblyName in referencedAssemblies)
-{
-    var assembly = Assembly.Load(assemblyName);
-    var types = assembly.GetTypes()
-        .Where(t => typeof(ITransientDependency).IsAssignableFrom(t) && t.IsClass);
-        
-    foreach (var type in types)
-    {
-        builder.Services.AddTransient(type);
-    }
-}
 
 
 
@@ -79,11 +68,9 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseStaticFiles();
-
 app.UseRouting();
-
+app.UseMiddleware<LocalizationMiddleware>();
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 

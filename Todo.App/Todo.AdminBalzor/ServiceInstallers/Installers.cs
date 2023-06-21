@@ -1,15 +1,20 @@
 ﻿using System.Reflection;
 using Blazored.LocalStorage;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Todo.AdminBlazor.Helper;
+using Todo.AdminBlazor.Middlewares;
 using Todo.AdminBlazor.Network;
 using Todo.Core.Consts.Permissions;
 using Todo.Core.DependencyRegistrationTypes;
 using Todo.Core.Securitys;
+using Todo.Core.Validations;
+using Todo.Localziration;
 
 namespace Todo.AdminBlazor.ServiceInstallers;
 
@@ -22,6 +27,7 @@ public static class Installers
     {
         _service = service;
         _configuration = configuration;
+        InstallFluentValidation();
         RegisterService();
         AddAuthorization();
         AddHttpClientConfig();
@@ -54,11 +60,20 @@ public static class Installers
                 {
                     builder.AddRequirements(new ClaimRequirement(AccessClaims.Tenants.Default));
                 }
-                
-                );
-            
+            );
+            options.AddPolicy(AccessClaims.Users.Default, builder =>
+            {
+                builder.AddRequirements(new ClaimRequirement(AccessClaims.Users.Default));
+            });
             // The rest omitted for brevity.
         });
+    }
+
+    private static void InstallFluentValidation()
+    {
+        _service.AddFluentValidationAutoValidation();
+        _service.AddFluentValidationClientsideAdapters();
+        _service.AddValidatorsFromAssemblyContaining<IValidatorService>();
     }
     private static void RegisterService()
     {
@@ -81,6 +96,8 @@ public static class Installers
         _service.AddHttpContextAccessor();
         _service.AddScoped<JwtTokenHeaderHandler>();
         _service.AddScoped<CookieHelper>();
+        _service.AddSingleton<Localizer>();
+        _service.AddScoped<LocalizationMiddleware>();
 
     }
 }

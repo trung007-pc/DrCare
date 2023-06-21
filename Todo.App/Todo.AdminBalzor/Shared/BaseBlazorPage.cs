@@ -24,8 +24,7 @@ public class BaseBlazorPage : ComponentBase
         [CascadingParameter]
         public Task<AuthenticationState> AuthState { get; set; }
         
-        [CascadingParameter]
-        public Localizer  L { get; set; } 
+        [Inject] public Localizer  L { get; set; } 
         protected IMapper ObjectMapper { get;}
         public bool IsDisable  { get; set; }
         
@@ -65,7 +64,7 @@ public class BaseBlazorPage : ComponentBase
                         }
                         case ActionTypes.Update:
                         {
-                            NotifyMessage("Update thanh cong",Color.Success,Severity.Success);
+                            NotifyMessage(L["Notification.Update"],Color.Success,Severity.Success);
                             break;
                         }
                         case ActionTypes.Get:
@@ -139,7 +138,7 @@ public class BaseBlazorPage : ComponentBase
                     }
                 }
 
-
+               StateHasChanged();
                 return true;
             }
             catch (Exception e)

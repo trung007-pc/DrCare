@@ -7,11 +7,19 @@
 @code{
     public async Task ShowModel()
     {
+     
         var result = await DialogService.OpenAsync(Title, ds =>
             @<div style="overflow: hidden">
                 @ChildContent
             </div> , new DialogOptions() {Width = Width,Height = Height,Style = Style
                        , ShowTitle = ShowTitle,CloseDialogOnOverlayClick = true});
+    }
+
+    public async Task<bool?> ShowConfirmModal()
+    {
+        var result = await DialogService.Confirm(ConfirmMessage,
+            Title, new ConfirmOptions() {OkButtonText = "Yes", CancelButtonText = "No"});
+        return result;
     }
 
     public void HideModel()

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
+using Todo.AdminBlazor.Helper;
 using Todo.AdminBlazor.Network;
 using Todo.AdminBlazor.Security;
 using Todo.Contract.Claims;
@@ -13,20 +14,15 @@ namespace Todo.AdminBlazor.Services;
 public class UserService : IUserService,ITransientDependency
 {
     private readonly AuthenticationStateProvider  _authenticationStateProvider;
-    private readonly IHttpContextAccessor _httpContextAccessor;
     private HttpClient _client;
-    
-    private IJSRuntime _JSRuntime { get; set; }
+    private CookieHelper _cookieHelper;
 
-    
-
-    public UserService(ILocalStorageService localStorage,IJSRuntime jsInterop,IHttpClientFactory factory
-        ,AuthenticationStateProvider  authenticationStateProvider,IHttpContextAccessor httpContextAccessor) 
+    public UserService(ClientSetter setter,CookieHelper cookieHelper,
+        AuthenticationStateProvider  authenticationStateProvider) 
     {
         _authenticationStateProvider = authenticationStateProvider;
-        _httpContextAccessor = httpContextAccessor;
-        _JSRuntime = jsInterop;
-        _client = factory.HttpClientAsync("DefaultClient");
+        _client = setter.GetClient("DefaultClient");
+        _cookieHelper = cookieHelper;
     }
 
 
@@ -50,9 +46,9 @@ public class UserService : IUserService,ITransientDependency
         throw new NotImplementedException();
     }
 
-    public Task DeleteAsync(Guid id)
+    public async Task DeleteAsync(Guid id)
     {
-        throw new NotImplementedException();
+         await  _client.DeleteAPIAsync<Task>($"user/{id}");
     }
 
     public Task<TokenDto> SignInAsync(LoginRequestDto request)
@@ -105,9 +101,7 @@ public class UserService : IUserService,ITransientDependency
     public async Task<TokenDto> LoginAsync(LoginRequestDto request)
     {
         var response = await _client.PostAPIAsync<TokenDto>("user/login", request);
-
-        await _JSRuntime.InvokeAsync<string>("blazorExtensions.WriteCookie", "access-token", response.Token, 2);
-        // await _localStorage.SetItemAsync("my-access-token", response.Token);
+        _cookieHelper.SetCookie("access-token",response.Token,2);
         ((ApiAuthenticationStateProvider) _authenticationStateProvider).MarkUserAsAuthenticated(request.UserName);
         return new TokenDto();
     }

@@ -2,10 +2,26 @@
   "Api:0001": "Item không tồn tại",
   "Api:0002": "Item đã tồn tại",
   "Api:0003": "Email đã tồn tại",
-
+  "Api:0006": "Phạm vi Thời gian thiết lập không hợp lệ ",
 
 
   "User:0001": "Thông tin đăng nhập không chính xác vui lòng kiểm tra lại",
-  "User:0002": "UserName đã tồn tại"
+  "User:0002": "UserName đã tồn tại",
+
+
+   "Tenant:0001": "Tên số điện thoại đã tồn tại trong hệ thống User.vui lòng chọn số khác",
+   "Tenant:0002": "Tên đã tồn tại rồi",
+
+
+  "InvalidUserName": "User không hợp lệ",
+  "InvalidEmail": "Email không hợp lệ",
+   "DuplicateUserName": "UserName bị trùng",
+  "DuplicateEmail": "Email bị trùng",
+  "InvalidRoleName": "Tên Role không hợp lệ",
+  "DuplicateRoleName": "Tên role bị trùng",
+  "UserAlreadyInRole":  "User đã chỉ định role này rồi ",
+  "UserNotInRole": "User không được chỉ định role này",
+  "PasswordTooShort": "Password quá ngắn",
+  "PasswordRequiresUniqueChars": "Password yêu cầu kí tự"
 
 }

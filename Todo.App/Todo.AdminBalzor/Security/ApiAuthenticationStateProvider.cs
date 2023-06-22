@@ -37,12 +37,8 @@ public class ApiAuthenticationStateProvider : AuthenticationStateProvider
 
             if (!CheckExpiredToken(claims))
             {
-                _cookieHelper.RemoveCookie("access-token");
-
-
                 NotificationMessage();
-                
-                Thread.Sleep(4000);
+                _cookieHelper.RemoveCookie("access-token");
                 return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
             }
           
@@ -60,7 +56,7 @@ public class ApiAuthenticationStateProvider : AuthenticationStateProvider
 
     public void NotificationMessage()
     {
-        _snackbar.Add("Phiên làm việc của bạn đã hết.Hệ thống sẽ tự logout sau 4s nữa", Severity.Info, config =>
+        _snackbar.Add("Phiên làm việc của bạn đã hết.Hệ thống sẽ tự logout sau 2s nữa", Severity.Info, config =>
         {
             config.Icon = Icons.Custom.Brands.GitHub;
             config.IconColor = Color.Warning;

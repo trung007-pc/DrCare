@@ -93,7 +93,7 @@
   "User.InvalidLogics": "Invalid Logics: ",
 
   "Validator.InValidFormat": "Invalid Format",
-  "Validator.User.IsRequired": "Not empty",
+  "Validator.IsRequired": "Not empty",
 
   "Notification.Create": "Create successfully",
   "Notification.Update": "Update successfully",

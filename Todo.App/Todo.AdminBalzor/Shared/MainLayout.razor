@@ -5,6 +5,7 @@
 @inherits LayoutComponentBase
 @inject NavigationManager _navigationManager;
 @inject CookieHelper _cookieHelper;
+@inject ContextMenuService ContextMenuService
 @inject Localizer L;
 
 <PageTitle>Todo.TenantBlazor</PageTitle>
@@ -44,9 +45,9 @@
 
     <MudDrawer @bind-Open="@_rightDrawerOpen"  Anchor="Anchor.End" ClipMode="DrawerClipMode.Never" Elevation="1" Variant="@DrawerVariant.Mini" Breakpoint="Breakpoint.Sm" Width="17vw" PreserveOpenState="false" Style="background-color: #161616;padding: 5px">
         <MudDrawerHeader Style="justify-content: center">
-            <MudBadge Color="Color.Success" Overlap="true" Bordered="true">
-                <MudAvatar Image="https://fcb-abj-pre.s3.amazonaws.com/img/jugadors/MESSI.jpg"/>
-            </MudBadge>
+            
+            <RadzenImage Path="https://fcb-abj-pre.s3.amazonaws.com/img/jugadors/MESSI.jpg" Click="@(args => ShowContextMenuWithItems(args))"  Style="object-fit: cover;width:40px;border-radius: 20%" />
+            
         </MudDrawerHeader>
         <RadzenStack Orientation="Radzen.Orientation.Vertical" JustifyContent="JustifyContent.End" Style="flex: 1">
                       <div style="display: flex;justify-content: space-between;align-items: center;gap: 2vw">
@@ -72,13 +73,14 @@
 </MudLayout>
 
 
-<MudThemeProvider/>
-<MudDialogProvider/>
-<MudSnackbarProvider/>
+
 <RadzenDialog/>
 <RadzenNotification/>
 <RadzenContextMenu/>
 <RadzenTooltip/>
+<MudDialogProvider/>
+<MudSnackbarProvider/>
+<MudThemeProvider/>
 
 @code {
     bool _leftDrawerOpen = false;
@@ -105,5 +107,33 @@
         if (CultureCodes.VI == value) return "Images/Cultures/dong_lao.png";
         if (CultureCodes.EN == value) return "Images/Cultures/mi_den.png";
         return "";
+    }
+    
+    
+    void ShowContextMenuWithItems(MouseEventArgs args)
+    {
+        ContextMenuService.Open(args,
+            new List<ContextMenuItem> {
+                new ContextMenuItem(){ Text = "Profile", Value = "profile", Icon = "home" },
+                new ContextMenuItem(){ Text = "Logout", Value = "logout", Icon = "logout" },
+            }, OnMenuItemClick);
+    }
+    
+    
+    void OnMenuItemClick(MenuItemEventArgs args)
+    {
+        switch (args.Value)
+        {
+            case "profile":
+            {
+                break;
+            }
+            case "logout":
+            {
+                _navigationManager.NavigateTo("logout");
+                break;
+            }   
+        }
+
     }
 }

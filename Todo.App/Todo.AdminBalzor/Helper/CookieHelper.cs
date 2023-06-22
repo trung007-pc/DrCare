@@ -24,8 +24,10 @@ public class CookieHelper
 
     }
 
-    public  void RemoveCookie(string name)
+    public async void RemoveCookie(string name)
     {
-        _context.Response.Cookies.Delete(name);
+        await _JSRuntime.InvokeAsync<string>("blazorExtensions.DeleteCookie", name);
+
+        // _context.Response.Cookies.Delete(name);
     }
 }

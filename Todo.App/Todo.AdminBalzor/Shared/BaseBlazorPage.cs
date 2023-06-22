@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
 using MudBlazor;
+using Todo.AdminBlazor.Helper;
 using Todo.Contract.Extensions;
 using Todo.Core.Consts.Permissions;
 using Todo.Core.Enums;
@@ -23,6 +24,7 @@ public class BaseBlazorPage : ComponentBase
 
         [CascadingParameter]
         public Task<AuthenticationState> AuthState { get; set; }
+        [Inject] private CookieHelper _cookieHelper { get; set; }
         
         [Inject] public Localizer  L { get; set; } 
         protected IMapper ObjectMapper { get;}
@@ -163,9 +165,6 @@ public class BaseBlazorPage : ComponentBase
                 else if (exceptionType == typeof(UnauthorizedException))
                 {
                     NotifyMessage(e.Message,Color.Secondary,Severity.Error);
-
-                    Thread.Sleep(4000);
-                    
                     _navigationManager.NavigateTo($"login?ToURl={_navigationManager.Uri}", true);
                 }
 

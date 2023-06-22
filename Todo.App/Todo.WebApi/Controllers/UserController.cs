@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Todo.Contract.Claims;
 using Todo.Contract.Users;
@@ -8,6 +9,7 @@ namespace Todo.App.Controllers;
 
 [ApiController]
 [Route("api/user/")]
+[Authorize]
 public class UserController : IUserService
 {
     private UserService _userService;
@@ -116,6 +118,7 @@ public class UserController : IUserService
     
     [HttpPost]
     [Route("login")]
+    [AllowAnonymous]
     public async Task<TokenDto> LoginAsync(LoginRequestDto request)
     {
         return await _userService.SignInAsync(request);

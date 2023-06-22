@@ -320,7 +320,7 @@ public class UserService : BaseService,IUserService,ITransientDependency
                 issuer: _configuration["Jwt:Issuer"],
                 audience: _configuration["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.Now.AddHours(168),
+                expires: DateTime.Now.AddHours(8),
                 signingCredentials: signinCredentials
             );
             var tokenString = new JwtSecurityTokenHandler().WriteToken(tokeOptions);

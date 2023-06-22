@@ -115,4 +115,9 @@ public class UserService : IUserService,ITransientDependency
     {
         throw new NotImplementedException();
     }
+    
+    public async void Logout()
+    {
+        await ((ApiAuthenticationStateProvider)_authenticationStateProvider).MarkUserAsLoggedOut();
+    }
 }

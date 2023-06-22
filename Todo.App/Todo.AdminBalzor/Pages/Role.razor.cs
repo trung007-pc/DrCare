@@ -48,7 +48,6 @@ public partial class Role
                     HeaderTitle = L["Role"];
                     await SetAuthorizedAction();
                     await GetRoles();
-                    StateHasChanged();
                 }, ActionTypes.GetList);
              
             }
